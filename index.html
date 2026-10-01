@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2457c5">
+<title>증명사진 만들기 · 여권사진 규격 맞추기, 휴대폰 사진으로 3.5×4.5 파일·4×6 인화용·A4 인쇄 (업로드 없이)</title>
+<meta name="description" content="휴대폰으로 찍은 사진을 여권·주민등록증·운전면허증(3.5×4.5cm), 반명함(3×4cm), 명함판, 미국·중국 비자 규격에 맞춰 자르는 무료 도구입니다. 정수리와 턱 위치를 맞추면 머리 길이를 mm 단위로 재서 여권 기준(3.2~3.6cm)에 자동으로 맞추고, 흰 배경·가운데·해상도를 점검합니다. 온라인 제출용 JPG(413×531 픽셀·용량 맞춤), 사진관·편의점 인화용 4×6 JPG, 집 프린터용 A4 PDF로 저장합니다. 사진은 서버로 전송되지 않습니다.">
+<meta property="og:title" content="증명사진 만들기 · 여권사진 규격 맞추기">
+<meta property="og:description" content="폰 사진을 여권·주민등록증·운전면허·반명함 규격에 맞춰 자르고, 머리 길이 3.2~3.6cm를 mm로 점검. 제출용 JPG·4×6 인화용·A4 PDF 저장. 사진은 서버로 전송되지 않습니다.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hwj-hub.github.io/id_photo/">
+<!-- 링크 미리보기 그림: 스크래퍼는 절대 주소만 읽으므로 배포 주소로 적는다. 그림은 make_thumbnail.py og 가 만든 og-image.png(1200×630) -->
+<meta property="og:image" content="https://hwj-hub.github.io/id_photo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="증명사진 만들기 — 휴대폰 사진을 여권·주민등록증·반명함 규격에 맞춰 자르고 4×6 인화용·A4로 저장하는 무료 도구">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%F0%9F%AA%AA%3C/text%3E%3C/svg%3E">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  color-scheme:light dark;
+  --bg:#eef2f8; --card:#fff; --card2:#f5f8fc; --fg:#15233a; --muted:#5a6a80; --line:#dde5f0;
+  --accent:#2457c5; --accent2:#3d7be0; --afg:#fff;
+  --ok:#0f766e; --okbg:#e6f3f2; --warn:#b45309; --warnbg:#fef4e6; --danger:#c81e1e; --dangerbg:#fdecec;
+  --info:#475569; --infobg:#eef1f6;
+  --shadow:0 1px 2px rgba(21,35,58,.05),0 8px 24px -14px rgba(21,35,58,.32);
+  --r:16px;
+}
+@media (prefers-color-scheme:dark){
+ :root{
+  --bg:#0c121c; --card:#141d2b; --card2:#101824; --fg:#e8eef8; --muted:#9fb0c6; --line:#253247;
+  --accent:#7fa8f5; --accent2:#a9c4fa; --afg:#0b1a36;
+  --ok:#34d399; --okbg:#0f2a26; --warn:#fbbf24; --warnbg:#2a2110; --danger:#f87171; --dangerbg:#2c1414;
+  --info:#c3ccd8; --infobg:#1f242e;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.8);
+ }
+}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);line-height:1.55;word-break:keep-all;overflow-wrap:anywhere;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,sans-serif;
+  -webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:1180px;margin:0 auto;padding:0 14px calc(70px + env(safe-area-inset-bottom))}
+.hide{display:none !important}
+.nw{white-space:nowrap}
+
+/* ══ 광고 슬롯 ══ 자리만 비워 두고 화면 폭에 맞는 크기를 AD 가 채운다.
+   크기를 미리 잡아 두어 광고가 늦게 떠도 화면이 밀리지 않는다(애드핏: 광고 공간은 고정되어야 함) */
+.ad-slot{display:flex;align-items:center;justify-content:center;margin:10px auto;max-width:100%}
+.ad-top{width:320px;height:50px;max-width:100%}
+.ad-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);
+  border-radius:8px;background:var(--card2);color:var(--muted);font-size:11px;letter-spacing:.08em;font-weight:600}
+.ad-lab{display:block;text-align:center;font-size:9.5px;font-weight:700;letter-spacing:.14em;color:var(--muted);opacity:.7;margin:12px 0 -4px}
+body.no-ad .ad-slot,.ad-none{display:none !important}
+/* PC 옆 칸 — 편집 카드 바로 위 320×50 (좁은 화면에서는 숨긴다) */
+@media (max-width:979px){#ad-side{display:none}}
+@media (min-width:980px){#ad-side{margin:14px auto 0}}
+/* 본문 광고는 버튼·입력칸에서 넉넉히 떼어 놓는다 — 실수로 눌리는 자리는 금지 */
+#ad-mid{margin:18px auto}
+
+/* ── 인앱 브라우저 안내 띠 ── 앱 안 WebView 는 파일을 내려받지 못한다 */
+.iabar{display:none;align-items:center;gap:10px;margin:10px 0 0;padding:11px 12px;border-radius:12px;
+  background:var(--warnbg);border:1px solid color-mix(in srgb,var(--warn) 34%,transparent);line-height:1.5}
+body.inapp .iabar{display:flex}
+.iabar .ia-t{flex:1 1 auto;min-width:0;font-size:12.5px;font-weight:700;color:var(--fg)}
+.iabar .ia-t small{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-top:2px}
+.iabar .ia-go{flex:0 0 auto;font:inherit;font-size:12.5px;font-weight:800;color:#fff;border:0;border-radius:999px;
+  padding:9px 14px;min-height:38px;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+@media (prefers-color-scheme:dark){.iabar .ia-go{color:var(--afg)}}
+.iabar .ia-x{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:transparent;
+  color:var(--muted);font:inherit;font-size:12px;line-height:1;cursor:pointer}
+/* ── 앱 안에서 열었을 때 막는 창 ── 토스트(z-index 99)보다는 아래에 둔다 */
+.iamodal{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:18px;
+  background:rgba(8,14,26,.72);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+body.ia-lock{overflow:hidden}
+body.ia-lock .iamodal{display:flex}
+body.ia-lock .wrap{pointer-events:none}
+.iasheet{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);
+  width:100%;max-width:420px;max-height:92vh;overflow:auto;padding:22px 18px 16px;text-align:center}
+.iasheet .iaic{font-size:34px;line-height:1;margin-bottom:10px}
+.iasheet h2{font-size:17.5px;font-weight:800;letter-spacing:-.02em;margin:0 0 10px;line-height:1.45;text-wrap:balance}
+.iap{font-size:13.5px;font-weight:600;color:var(--muted);line-height:1.7;margin:0 0 14px}
+.iap b{color:var(--fg);font-weight:800}
+.iasteps{text-align:left;margin:0 0 16px;padding:12px 14px 12px 32px;border-radius:12px;background:var(--card2);
+  font-size:13px;font-weight:600;color:var(--muted);line-height:1.7}
+.iasteps li+li{margin-top:5px}
+.iasteps b{color:var(--fg);font-weight:800}
+.iabtn{display:block;width:100%;font:inherit;font-size:15px;font-weight:800;color:#fff;border:0;border-radius:12px;
+  padding:14px;min-height:52px;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  box-shadow:var(--shadow)}
+@media (prefers-color-scheme:dark){.iabtn{color:var(--afg)}}
+.iafine{margin:12px 0 0;font-size:12px;font-weight:600;color:var(--muted);line-height:1.6}
+.iafine button{font:inherit;font-size:12px;font-weight:700;color:var(--muted);background:none;border:0;padding:6px 8px;
+  text-decoration:underline;cursor:pointer;min-height:36px}
+.dwarn{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--warnbg);font-size:12.5px;font-weight:700;line-height:1.6}
+.dwarn button{font:inherit;font-size:12.5px;font-weight:800;color:var(--accent);background:none;border:0;padding:9px 2px;margin:-9px 0;
+  text-decoration:underline;cursor:pointer}
+
+/* ── 하단 오버형 ── 콘텐츠를 가리지 않도록 본문 아래 여백을 같이 늘린다(애드핏: 콘텐츠를 덮는 배치 금지).
+   규격을 고르고 사진을 맞추는 중·저장 카드를 보는 중에는 띄우지 않는다 — 핵심 행동 중 광고 노출 금지 조항 */
+#anchor{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;align-items:center;justify-content:center;
+  background:var(--card);border-top:1px solid var(--line);box-shadow:0 -8px 22px -14px rgba(0,0,0,.55);
+  padding:8px 4px calc(8px + env(safe-area-inset-bottom));transform:translateY(120%);
+  /* 바 위쪽에 붙은 「광고」 라벨·닫기는 translateY 로 내려도 화면에 걸쳐 남는다 — 통째로 감춘다 */
+  visibility:hidden;pointer-events:none;transition:transform .22s,visibility 0s linear .22s}
+#anchor.on{transform:none;visibility:visible;pointer-events:auto;transition:transform .22s,visibility 0s}
+#anchor .ad-slot{margin:0}
+#anchor .amk{position:absolute;left:10px;top:-11px;font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--muted);
+  background:var(--card);border:1px solid var(--line);border-radius:5px;padding:0 5px;line-height:15px}
+/* 닫기는 광고 영역 밖에 둔다 — 광고 안에 닫기 버튼을 넣는 것은 금지(오클릭 방지) */
+#anchor .axl{position:absolute;right:6px;top:-38px;width:36px;height:36px;border-radius:50%;cursor:pointer;
+  border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:13px;line-height:1;box-shadow:var(--shadow)}
+#anchor .axl::before{content:'';position:absolute;inset:-6px}
+body.anch .wrap{padding-bottom:calc(124px + env(safe-area-inset-bottom))}
+body.anch #toast{bottom:calc(118px + env(safe-area-inset-bottom))}
+@media (min-width:980px){#anchor{display:none}}
+
+/* ── 저장 완료 카드 ── 화면을 덮지 않고 본문 흐름 안에 펼친다 */
+#doneCard{border-color:color-mix(in srgb,var(--ok) 40%,var(--line))}
+#doneCard .ad-lab{margin-top:16px}
+.dmsg{margin:0 0 10px;font-size:14px;font-weight:700;line-height:1.6}
+.dsteps{margin:0;padding:0 0 0 20px;font-size:13px;font-weight:600;line-height:1.75;color:var(--muted)}
+.dsteps b{color:var(--fg);font-weight:800}
+
+header{text-align:center;padding:14px 0 2px}
+.logo{display:inline-flex;align-items:center;gap:9px;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.logo .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:var(--shadow)}
+.tag{font-size:14.5px;font-weight:600;color:var(--muted);margin:8px 0 0;text-wrap:balance}
+.tag b{color:var(--fg)}
+.badges{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.badge{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--okbg);color:var(--ok);border:1px solid transparent}
+.badge.gray{background:var(--card2);color:var(--muted);border-color:var(--line)}
+
+/* ── 두 칸 배치 ── */
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:0 16px}
+@media (min-width:980px){
+  .layout{grid-template-columns:minmax(0,1fr) 460px;align-items:start}
+  /* 옆 칸은 화면 높이 안에서 따로 스크롤한다 — sticky 만 두면 저장 완료 카드가 화면 밖으로 빠진다 */
+  .side{position:sticky;top:8px;max-height:100vh;overflow:auto;padding-bottom:10px;scrollbar-width:thin}
+}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-top:14px}
+.card h2{font-size:12px;font-weight:800;color:var(--muted);margin:0 0 12px;letter-spacing:.07em;
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card h2 .n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;margin-right:6px;
+  background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);letter-spacing:0;font-size:11.5px}
+.card h2 .opt{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.02em;text-align:right}
+
+/* ── 폼 ── */
+.row{margin-top:14px}
+.lab{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:13.5px;font-weight:800;margin-bottom:7px}
+.lab .hint{font-weight:500;color:var(--muted);font-size:12px;text-align:right}
+input[type=text],input[type=number],select{font:inherit;font-size:16px;color:var(--fg);background:var(--card2);
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;width:100%;min-width:0}
+input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.grid3{display:flex;gap:8px;flex-wrap:wrap}
+.grid3>label{flex:1 1 90px;min-width:0;font-size:12px;font-weight:800;color:var(--muted)}
+.grid3>label input{margin-top:4px}
+.seg{display:flex;gap:5px;flex-wrap:wrap}
+.seg button{flex:1 1 0;border:1px solid var(--line);background:var(--card2);color:var(--muted);font:inherit;
+  font-size:13.5px;font-weight:800;padding:9px 8px;border-radius:10px;cursor:pointer;min-height:46px;transition:.15s;min-width:64px}
+.seg button:hover{border-color:var(--accent)}
+.seg button.on{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.seg button .s{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:1px;line-height:1.4}
+.seg button.on .s{color:var(--accent)}
+.seg.sm button{min-height:42px;font-size:12.5px;padding:7px 6px;min-width:52px}
+.kinds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (min-width:560px){.kinds{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.kinds button{border:2px solid var(--line);background:var(--card2);border-radius:12px;padding:9px 6px 8px;cursor:pointer;font:inherit;
+  font-size:13.5px;font-weight:800;color:var(--fg);display:flex;flex-direction:column;align-items:center;gap:4px;min-height:44px;transition:.15s}
+.kinds button canvas{display:block;width:40px;height:40px}
+.kinds button .s{font-size:11px;font-weight:600;color:var(--muted);line-height:1.35}
+.kinds button.on{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.rinfo{margin-top:12px;border-radius:11px;padding:10px 12px;font-size:12.5px;font-weight:700;line-height:1.65;border-left:3px solid}
+.rinfo:empty{display:none}
+.rinfo.ok{background:var(--okbg);color:var(--ok)}
+.rinfo.warn{background:var(--warnbg);color:var(--warn)}
+.rinfo.info{background:var(--infobg);color:var(--info)}
+.rinfo b{font-weight:800}
+.rules{margin:10px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:minmax(0,1fr);gap:4px 14px}
+@media (min-width:560px){.rules{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rules li{position:relative;padding-left:16px;font-size:12.5px;font-weight:600;color:var(--muted);line-height:1.6}
+.rules li::before{content:'✓';position:absolute;left:0;top:0;color:var(--accent);font-weight:800}
+.rules li b{color:var(--fg);font-weight:800}
+.fine{font-size:12px;font-weight:600;color:var(--muted);line-height:1.65;margin:9px 0 0}
+.fine b{color:var(--fg)}
+.fine a{color:var(--accent);font-weight:800}
+.note{font-size:12px;font-weight:600;line-height:1.65;margin:10px 0 0;padding:9px 11px;border-radius:10px;background:var(--infobg);color:var(--info)}
+.note.warn{background:var(--warnbg);color:var(--warn)}
+.note b{font-weight:800}
+.note:empty{display:none}
+
+.mini{border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;font-size:13px;font-weight:700;
+  padding:9px 14px;border-radius:999px;cursor:pointer;min-height:42px;transition:.15s}
+.mini:hover{border-color:var(--accent)}
+.mini:disabled{opacity:.45;cursor:default}
+.mini.on{border-color:var(--accent);color:var(--accent)}
+.btn{flex:1 1 130px;border:1px solid var(--line);background:var(--card2);color:var(--fg);font:inherit;font-size:14px;font-weight:800;
+  padding:10px 12px;border-radius:12px;cursor:pointer;min-height:50px;transition:.15s;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;text-align:center;line-height:1.3}
+.btn i{font-style:normal;font-size:11.5px;font-weight:600;opacity:.85}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.pri{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:var(--shadow)}
+@media (prefers-color-scheme:dark){.btn.pri{color:var(--afg)}}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.actions .btn.pri{flex-basis:100%}
+
+/* ── 사진 넣기 ── */
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:2px dashed color-mix(in srgb,var(--accent) 45%,var(--line));
+  border-radius:14px;background:color-mix(in srgb,var(--accent) 5%,var(--card2));padding:18px 12px;text-align:center;cursor:pointer;transition:.15s;min-height:112px}
+.drop:hover,.drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 11%,var(--card2))}
+.drop b{font-size:15.5px;font-weight:800}
+.drop span{font-size:12.5px;font-weight:600;color:var(--muted)}
+.drop .big{font-size:28px;line-height:1}
+.drop input{display:none}
+.pbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.pname{flex:1 1 140px;min-width:0;font-size:12.5px;font-weight:700;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shoot{margin:12px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.shoot li{font-size:12px;font-weight:700;color:var(--muted);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:7px 9px;line-height:1.5}
+.shoot li b{display:block;color:var(--fg);font-size:12.5px}
+
+/* ── 편집 ── */
+.ed h2 .edstate{letter-spacing:.02em;font-weight:700;font-size:11.5px}
+.steptab{display:flex;gap:5px;margin:0 0 10px}
+.steptab button{flex:1 1 0;border:1px solid var(--line);background:var(--card2);color:var(--muted);font:inherit;font-size:13px;font-weight:800;
+  padding:8px 6px;border-radius:10px;cursor:pointer;min-height:44px}
+.steptab button.on{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.steptab button:disabled{opacity:.45;cursor:default}
+.edbox{display:flex;justify-content:center;align-items:center;background:color-mix(in srgb,var(--muted) 14%,var(--card2));border-radius:12px;padding:10px;
+  border:1px solid var(--line);min-height:240px;position:relative}
+.edbox canvas{display:block;max-width:100%;touch-action:none;cursor:grab;border-radius:4px}
+.edbox canvas.drag{cursor:grabbing}
+.edbox canvas.mark{cursor:ns-resize}
+.edhint{font-size:12.5px;font-weight:600;color:var(--muted);text-align:center;margin:9px 0 0;line-height:1.6}
+.edhint b{color:var(--fg)}
+.tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.tools .zm{flex:1 1 170px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--muted);min-width:0;white-space:nowrap}
+.tools input[type=range]{flex:1 1 auto;accent-color:var(--accent);min-width:0;height:36px}
+.tools .mini{padding:8px 11px}
+.tools .zm output{min-width:38px;text-align:right;font-variant-numeric:tabular-nums}
+.meas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
+.meas div{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:7px 8px;text-align:center;min-width:0}
+.meas div span{display:block;font-size:10.5px;font-weight:800;color:var(--muted);letter-spacing:.03em}
+.meas div b{display:block;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.3}
+.meas div i{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:var(--muted)}
+.meas div.ok{border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.meas div.ok b{color:var(--ok)}
+.meas div.warn{border-color:color-mix(in srgb,var(--warn) 50%,var(--line))}
+.meas div.warn b{color:var(--warn)}
+.meas div.bad{border-color:color-mix(in srgb,var(--danger) 50%,var(--line))}
+.meas div.bad b{color:var(--danger)}
+.checks{list-style:none;margin:10px 0 0;padding:0}
+.checks li{position:relative;padding:6px 0 6px 26px;font-size:12.5px;font-weight:700;line-height:1.55;border-top:1px dashed var(--line)}
+.checks li:first-child{border-top:0}
+.checks li::before{position:absolute;left:2px;top:6px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;line-height:1}
+.checks li.ok::before{content:'✓';background:var(--okbg);color:var(--ok)}
+.checks li.warn::before{content:'!';background:var(--warnbg);color:var(--warn)}
+.checks li.bad::before{content:'✕';background:var(--dangerbg);color:var(--danger)}
+.checks li.info::before{content:'i';background:var(--infobg);color:var(--info)}
+.checks li i{display:block;font-style:normal;font-size:12px;font-weight:600;color:var(--muted)}
+.checks li a{color:var(--accent);font-weight:800}
+
+/* ── 저장 ── */
+.outpv{display:flex;justify-content:center;align-items:center;margin-top:12px;padding:12px;border-radius:12px;background:color-mix(in srgb,var(--muted) 14%,var(--card2));border:1px solid var(--line);min-height:120px}
+.outpv canvas{display:block;max-width:100%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.28);border-radius:1px}
+.spec{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;font-weight:700;color:var(--muted);margin-top:9px}
+.spec b{color:var(--fg);font-variant-numeric:tabular-nums}
+
+/* ── 안내 ── */
+.use{margin:0;padding:0 0 0 18px;font-size:14px;font-weight:600;line-height:1.75}
+.use li+li{margin-top:6px}
+.use b{font-weight:800}
+.use .d{display:block;font-size:12.5px;color:var(--muted)}
+.tbw{overflow-x:auto;margin:0 -2px;-webkit-overflow-scrolling:touch}
+table.kt{width:100%;min-width:640px;border-collapse:collapse;font-size:13px;line-height:1.6}
+table.kt th,table.kt td{border:1px solid var(--line);padding:9px 10px;vertical-align:top;text-align:left}
+table.kt th{background:var(--card2);font-weight:800;white-space:nowrap}
+table.kt td b{font-weight:800}
+table.kt td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tnote{font-size:12px;font-weight:600;color:var(--muted);line-height:1.7;margin:10px 0 0}
+.steps{list-style:none;margin:0;padding:0;counter-reset:st}
+.steps li{position:relative;padding-left:32px;margin-bottom:12px;font-size:14px;font-weight:600;line-height:1.7;counter-increment:st}
+.steps li:last-child{margin-bottom:0}
+.steps li::before{content:counter(st);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;
+  font-size:12px;font-weight:800;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+.steps li b{font-weight:800}
+.steps li .d{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+details{border-top:1px solid var(--line);padding:12px 0}
+details:first-of-type{border-top:0}
+summary{cursor:pointer;font-weight:700;font-size:14px;list-style:none;padding:10px 0;margin:-10px 0}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"＋ ";color:var(--accent);font-weight:800}
+details[open] summary::before{content:"－ "}
+details p{margin:8px 0 0;font-size:13.5px;color:var(--muted);line-height:1.8}
+details p b{color:var(--fg)}
+
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-height:1.8}
+footer b{color:var(--fg)}
+
+/* ══ 주의 문구 ══ */
+.nbx{border:1px solid var(--warn);border-radius:14px;background:var(--warnbg);padding:14px 15px;margin-top:14px}
+.nbx-h{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:800;color:var(--warn);margin:0 0 10px}
+.nbx-h .ic{flex:0 0 auto;width:19px;height:19px;border-radius:6px;background:var(--warn);color:var(--warnbg);
+  font-size:12px;font-weight:800;display:grid;place-items:center;line-height:1}
+.nbx ul{list-style:none;margin:0;padding:0}
+.nbx li{position:relative;padding-left:12px;margin-bottom:7px;font-size:12px;font-weight:600;line-height:1.68;color:var(--warn)}
+.nbx li:last-child{margin-bottom:0}
+.nbx li::before{content:"·";position:absolute;left:1px;top:-1px;font-weight:800}
+.nbx li b{font-weight:800}
+.nbx .nbx-f{margin:11px 0 0;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--warn) 32%,transparent);
+  font-size:12px;font-weight:700;line-height:1.72;color:var(--warn)}
+.nbx .nbx-f b{font-weight:800}
+
+#toast{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:#15233a;color:#fff;font-size:13.5px;font-weight:700;line-height:1.5;
+  padding:10px 16px;border-radius:14px;width:max-content;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:92vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-color-scheme:dark){#toast{background:#e8eef8;color:#0b1a36}}
+
+@media (max-width:430px){
+  .lab{flex-direction:column;align-items:stretch;gap:2px}
+  .lab .hint{text-align:left}
+  .card{padding:14px}
+  .seg button{font-size:13px;min-width:0}
+  .tag{font-size:14px}
+  .meas div b{font-size:15px}
+}
+@media print{body{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  광고 자리 ① 맨 위 · 320×50 (모바일·PC 같은 크기)                     ║
+     ║  단위 ID 는 스크립트 아래쪽 AD.units 한 곳에서 바꿉니다.               ║
+     ║  ins·script 를 여기 직접 쓰지 않고 AD 가 넣는 이유                     ║
+     ║   · 보이는 자리만 부르려고(안 보이는 광고는 부르지 않음)               ║
+     ║   · 한 페이지 4개 제한을 코드 한 곳에서 지키려고                       ║
+     ║  크기는 휴대폰에 들어가는 것만 씁니다 — 320×50 · 320×100 · 300×250     ║
+     ║  한 화면에 4곳 — 모바일 ① 맨 위 ③ 본문 ④ 완료 카드 ⑤ 하단 오버형      ║
+     ║              PC   ① 맨 위 ② 편집 카드 위 ③ 본문 ④ 완료 카드          ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+<div class="ad-slot ad-top" id="ad-top"></div>
+
+<!-- 네이버·카카오 앱 안에서 열렸을 때만 보이는 띠 (body.inapp) -->
+<div class="iabar" id="iabar">
+  <div class="ia-t"><span id="iaMsg">앱 안에서 열려서 사진 저장이 안 될 수 있어요.</span>
+    <small id="iaSub">사진을 넣기 전에 옮기면 다시 고르지 않아도 됩니다.</small></div>
+  <button class="ia-go" id="iaGo" type="button">크롬에서 열기</button>
+  <button class="ia-x" id="iaX" type="button" aria-label="안내 닫기">✕</button>
+</div>
+
+<header>
+  <div class="logo"><span class="ico">🪪</span><span>증명사진 만들기</span></div>
+  <p class="tag">휴대폰 사진을 <b>여권·주민등록증·운전면허·반명함</b> 규격에 맞춰 자르고, <b>제출용 파일</b>·<b>4×6 인화용</b>·<b>A4&nbsp;인쇄</b>로&nbsp;저장합니다</p>
+  <div class="badges">
+    <span class="badge">🔒 사진이 서버로 전송되지 않음</span>
+    <span class="badge gray">머리 길이 mm 자동 측정</span>
+    <span class="badge gray">보정·배경 합성 없음</span>
+    <span class="badge gray">설치·회원가입 없음</span>
+  </div>
+</header>
+
+<div class="layout">
+<main id="form">
+
+<!-- 1. 규격 -->
+<section class="card" id="specCard">
+  <h2><span><span class="n">1</span>어디에 낼 사진인가요</span><span class="opt" id="specOpt"></span></h2>
+  <div class="kinds" id="segSpec"></div>
+  <div class="row hide" id="customRow">
+    <div class="lab"><span>크기 직접 넣기</span><span class="hint">mm 단위 · 머리 길이는 세로의 70~80%로 잡습니다</span></div>
+    <div class="grid3">
+      <label>가로(mm)<input type="number" id="cw" min="15" max="120" step="0.5" inputmode="decimal"></label>
+      <label>세로(mm)<input type="number" id="ch" min="15" max="150" step="0.5" inputmode="decimal"></label>
+    </div>
+  </div>
+  <div class="rinfo info" id="specInfo"></div>
+  <ul class="rules" id="specRules"></ul>
+</section>
+
+<!-- 2. 사진 -->
+<section class="card" id="photoCard">
+  <h2><span><span class="n">2</span>사진 넣기</span><span class="opt" id="photoOpt"></span></h2>
+  <label class="drop" id="drop">
+    <input type="file" id="file" accept="image/*">
+    <span class="big">🤳</span>
+    <b id="dropTxt">사진 고르기 · 찍기</b>
+    <span>JPG·PNG·WEBP · 끌어 놓거나 붙여 넣어도 됩니다 · 한 장씩</span>
+  </label>
+  <div class="pbtns">
+    <button class="mini" id="sampleBtn" type="button">예시 사진으로 해 보기</button>
+    <span class="pname" id="pname"></span>
+  </div>
+  <ul class="shoot">
+    <li><b>흰 벽 앞</b>무늬·문틀이 없는 곳</li>
+    <li><b>벽에서 50cm 떨어져</b>뒤 그림자가 옅어집니다</li>
+    <li><b>창을 마주 보고</b>얼굴 그림자 없이 고르게</li>
+    <li><b>폰은 눈높이·1m 거리</b>가까이 찍으면 코가 커 보임</li>
+  </ul>
+</section>
+
+</main>
+
+<aside class="side" id="side">
+  <!-- 광고 자리 ② PC 편집 카드 바로 위 320×50 · 좁은 화면에서는 숨깁니다 -->
+  <div class="ad-slot" id="ad-side"></div>
+  <section class="card ed" id="edCard">
+    <h2><span><span class="n">3</span>얼굴 맞추기</span><span class="edstate" id="edState"></span></h2>
+    <div class="steptab" id="stepTab">
+      <button type="button" data-m="mark">① 정수리·턱 표시</button>
+      <button type="button" data-m="fit">② 규격에 맞추기</button>
+    </div>
+    <div class="edbox" id="edBox"><canvas id="ed" width="10" height="10" aria-label="사진 편집 — 선을 끌어 정수리·턱을 표시하고, 다음 단계에서 끌기·두 손가락으로 위치와 크기를 맞춥니다"></canvas></div>
+    <p class="edhint" id="edHint">사진을 넣으면 여기서 맞춥니다</p>
+
+    <div id="markTools" class="tools">
+      <button class="mini" id="reDetect" type="button">↺ 자동으로 다시 찾기</button>
+      <button class="btn pri" id="goFit" type="button" style="flex:1 1 180px;min-height:44px">다음 · 규격에 맞추기 →</button>
+    </div>
+    <div id="fitTools" class="hide">
+      <div class="tools">
+        <label class="zm">크기<input type="range" id="zoom" min="0.7" max="1.4" step="0.005" value="1" aria-label="사진 크기"><output id="zoomOut">100%</output></label>
+        <label class="zm">기울기<input type="range" id="tilt" min="-12" max="12" step="0.5" value="0" aria-label="기울기"><output id="tiltOut">0°</output></label>
+      </div>
+      <div class="tools">
+        <button class="mini" id="autoFit" type="button">⌖ 규격대로 다시 맞춤</button>
+        <button class="mini" id="flipBtn" type="button" title="좌우 뒤집기">⇆ 좌우 반전</button>
+        <button class="mini on" id="guideBtn" type="button">안내선</button>
+      </div>
+      <div class="meas" id="meas"></div>
+      <ul class="checks" id="checks"></ul>
+    </div>
+  </section>
+
+  <section class="card" id="outCard">
+    <h2><span><span class="n">4</span>저장하기</span><span class="opt" id="outOpt"></span></h2>
+    <div class="seg" id="segOut">
+      <button type="button" data-v="file">사진 파일<span class="s">온라인 제출용 JPG</span></button>
+      <button type="button" data-v="sheet">4×6 인화용<span class="s">사진관·편의점·앱</span></button>
+      <button type="button" data-v="a4">A4 인쇄<span class="s">집 프린터 PDF</span></button>
+    </div>
+    <div id="fileOpts" class="row">
+      <div class="lab"><span>픽셀 크기</span><span class="hint" id="pxHint"></span></div>
+      <div class="seg sm" id="segPx">
+        <button type="button" data-v="spec" id="pxSpecBtn">규격대로</button>
+        <button type="button" data-v="custom">직접 넣기<span class="s">원서 사이트가 정한 크기</span></button>
+      </div>
+      <div class="grid3 hide" id="pxCustom" style="margin-top:8px">
+        <label>가로(px)<input type="number" id="pw" min="100" max="3000" step="1" inputmode="numeric"></label>
+        <label>세로(px)<input type="number" id="ph" min="100" max="4000" step="1" inputmode="numeric"></label>
+      </div>
+      <div class="grid3" style="margin-top:8px">
+        <label>용량 상한(KB)<input type="number" id="kb" min="20" max="5000" step="10" inputmode="numeric" placeholder="없음"></label>
+      </div>
+    </div>
+    <div id="a4Opts" class="row hide">
+      <div class="lab"><span>몇 장</span><span class="hint">A4 한 장에 들어가는 만큼</span></div>
+      <div class="seg sm" id="segA4"></div>
+    </div>
+    <div class="outpv"><canvas id="outPv" width="10" height="10" aria-label="저장될 모양 미리보기"></canvas></div>
+    <div class="spec" id="outSpec"></div>
+    <div class="actions">
+      <button class="btn pri" id="saveBtn" type="button" disabled>저장하기</button>
+    </div>
+    <p class="note" id="outNote"></p>
+  </section>
+
+  <!-- 광고 자리 ④ 저장 완료 카드 300×250 — 저장한 다음에 펼쳐지고, 화면을 덮지 않습니다.
+       닫기는 카드 머리(광고에서 멀리 떨어진 곳)에 둡니다 — 광고 안 닫기 버튼은 금지 -->
+  <section class="card hide" id="doneCard">
+    <h2><span id="doneTitle">저장했습니다</span><button class="mini" id="doneHide" type="button">닫기</button></h2>
+    <p class="dmsg" id="doneMsg"></p>
+    <ol class="dsteps" id="doneSteps"></ol>
+    <p class="dwarn hide" id="doneInapp">파일이 안 보이나요? 앱 안 브라우저는 내려받기가 막혀 있습니다.
+      <button type="button" id="doneGo">다른 브라우저로 열기</button></p>
+    <div id="doneAd"><span class="ad-lab">광고</span><div class="ad-slot" id="ad-done"></div></div>
+  </section>
+</aside>
+</div>
+
+<!-- 광고 자리 ③ 본문 중간 320×100 — 규격·사진·맞추기·저장 카드가 다 끝난 자리에 둡니다(입력 중 광고 금지 조항).
+     버튼·입력칸에서 18px 이상 떼어 놓습니다. 모바일·PC 가 같은 자리라 단위 ID 하나면 됩니다 -->
+<div class="ad-slot" id="ad-mid"></div>
+
+<section class="card">
+  <h2><span>이럴 때 씁니다</span></h2>
+  <ul class="use">
+    <li><b>여권 온라인 재발급</b> — 정부24에서 재발급을 신청할 때 올리는 사진 파일(413×531픽셀 권장, 500KB 이하)을 규격대로 만듭니다.
+      <span class="d">머리 길이 3.2~3.6cm를 mm로 재서 맞추므로 「얼굴이 작다·크다」로 돌려받는 일을 줄입니다.</span></li>
+    <li><b>폰으로 찍어 편의점·사진관에서 뽑기</b> — 4×6(10×15cm) 한 장에 여권 사진 8장을 배치한 JPG를 인화 주문하면, 잘라서 바로 씁니다.</li>
+    <li><b>이력서·원서용 반명함</b> — 3×4cm에 맞춰 자르고, 원서 사이트가 정한 픽셀·용량이 있으면 그대로 넣어 저장합니다.</li>
+    <li><b>집 프린터로 급하게</b> — A4 포토용지에 실제 크기로 찍히는 PDF. 자를 선과 10mm 눈금이 같이 찍혀 크기가 맞는지 확인할 수 있습니다.</li>
+  </ul>
+</section>
+
+<section class="card">
+  <h2><span>규격 한눈에 보기</span></h2>
+  <div class="tbw"><table class="kt">
+    <thead><tr><th>용도</th><th>크기</th><th>머리 길이<br>(정수리~턱)</th><th>배경</th><th>파일로 낼 때</th><th>4×6 한 장에</th></tr></thead>
+    <tbody id="sizeBody"></tbody>
+  </table></div>
+  <p class="tnote">여권은 외교부 여권안내, 운전면허 픽셀은 도로교통공단 공지, 미국 비자는 미 국무부 사진 요건 기준입니다. 반명함·명함판의 머리 길이는 공식 기준이 없어 흔히 쓰는 범위를 권장값으로 적었습니다.
+    기관이 안내를 바꿀 수 있으니 <b>제출처 안내가 이 표와 다르면 제출처를 따르세요.</b></p>
+</section>
+
+<section class="card">
+  <h2><span>집에서 찍을 때 · 아기 여권 사진</span></h2>
+  <ol class="steps">
+    <li><b>흰 벽에서 50cm쯤 떨어져 섭니다</b> — 벽에 붙어 서면 머리 뒤로 진한 그림자가 생겨 배경이 얼룩져 보입니다.
+      <span class="d">벽이 미색·회색이면 큰 흰 종이(전지)나 흰 이불을 뒤에 걸어도 됩니다. 여권은 배경을 프로그램으로 지우거나 바꾼 사진을 받지 않습니다.</span></li>
+    <li><b>창문을 마주 보고 찍습니다</b> — 빛이 얼굴 정면에서 오면 그림자가 고르게 빠집니다. 천장 조명 바로 아래는 눈 밑이 어두워집니다.</li>
+    <li><b>폰은 눈높이, 1m 남짓 떨어져서</b> — 너무 가까이서 찍으면 코가 커 보이고, 위에서 찍으면 얼굴이 기울어 보입니다. 다른 사람이 찍어 주거나 타이머를 쓰세요.
+      <span class="d">카메라 확대(2배)를 쓰면 원근 왜곡이 줄어듭니다. 넉넉하게 찍어 두면 이 도구에서 잘라 맞춥니다.</span></li>
+    <li><b>정면·무표정·입 다물기</b> — 귀와 눈썹이 머리카락에 가리지 않게 넘기고, 안경은 반사가 생기면 벗습니다(미국 비자는 안경 불가).</li>
+    <li><b>아기(36개월 이하)는 흰 이불 위에 눕혀 위에서</b> — 폰을 아기 얼굴과 평행하게 들고 찍습니다. 입을 조금 벌린 것은 괜찮지만 눈은 떠야 하고, 손·장난감이 보이면 안 됩니다.
+      <span class="d">기울어졌다면 이 도구의 「기울기」로 바로 세울 수 있습니다.</span></li>
+  </ol>
+</section>
+
+<section class="card">
+  <h2><span>인화·인쇄·제출할 때</span></h2>
+  <ol class="steps">
+    <li><b>4×6 인화 맡기기</b> — 「4×6 인화용」 JPG를 사진관·인화 앱·편의점 사진 인화기에서 <b>4×6(10×15)</b>로 뽑습니다.
+      <span class="d">「화면 꽉 채우기·자동 보정」은 끄세요. 꽉 채우기를 켜면 가장자리가 잘려 크기가 조금 커지거나 작아질 수 있습니다.</span></li>
+    <li><b>크기 확인</b> — 사진 아래 <b>10mm 눈금</b>을 자로 재 보세요. 10mm가 맞으면 사진도 정확히 3.5×4.5cm입니다.</li>
+    <li><b>집 프린터로 A4</b> — PDF를 열어 <b>실제 크기(100%)</b>로 인쇄합니다. 「페이지에 맞춤」을 고르면 조금 작아집니다. 용지는 포토용지, 품질은 높음.</li>
+    <li><b>파일로 낼 때</b> — 정부24 여권 재발급은 413×531픽셀·500KB 이하, 미국 비자(DS-160)는 600×600픽셀·240KB 이하처럼 정해진 크기가 있습니다. 「사진 파일」을 고르면 규격 크기와 용량이 자동으로 맞춰집니다.</li>
+  </ol>
+</section>
+
+<section class="card">
+  <h2><span>자주 묻는 것</span></h2>
+  <details><summary>사진이 어디로 올라가나요?</summary>
+    <p>어디에도 올라가지 않습니다. 고른 사진은 <b>이 브라우저 안에서만</b> 읽고 잘라서 저장합니다. 페이지를 닫으면 사라집니다. 저장한 JPG에는 원본 사진의 <b>위치 정보(GPS)가 남지 않습니다</b>.</p></details>
+  <details><summary>배경을 흰색으로 바꿔 주지는 않나요?</summary>
+    <p>일부러 넣지 않았습니다. 외교부 여권 사진 규정은 <b>편집 프로그램으로 배경을 제거하거나 합성한 사진</b>, AI로 편집·가공한 사진을 받지 않는다고 적고 있습니다. 이 도구는 <b>자르기·크기 맞추기·기울기만</b> 하므로 찍은 사진 그대로입니다.
+      이력서처럼 배경 규정이 없는 곳에 낼 사진이라면 배경 제거 도구를 따로 쓸 수 있지만, 신분증·여권에는 흰 벽 앞에서 다시 찍는 쪽이 안전합니다.</p></details>
+  <details><summary>정수리는 어디에 맞추나요?</summary>
+    <p>규정의 머리 길이는 <b>머리카락을 뺀 머리 꼭대기</b>부터 턱 끝까지입니다. 머리를 묶거나 부풀린 경우 머리카락 윗부분이 아니라 <b>두피가 있을 자리</b>에 파란 선을 두세요. 턱 끝은 수염·그림자가 아니라 턱뼈 끝입니다.</p></details>
+  <details><summary>자동으로 찾은 선이 틀려요</summary>
+    <p>피부색과 배경을 보고 <b>짐작</b>하는 것이라, 조명이 어둡거나 배경이 복잡하면 빗나갑니다. 선을 직접 끌어 옮기면 됩니다. 끄는 동안 손가락 옆에 확대 창이 떠서 정확히 맞출 수 있습니다.</p></details>
+  <details><summary>「원본이 작아요」 경고가 떠요</summary>
+    <p>얼굴 부분의 픽셀이 300dpi로 뽑기에 모자란다는 뜻입니다. 멀리서 찍었거나 캡처·메신저로 받은 사진(크기가 줄어 있음)일 때 나옵니다. <b>원본 사진 파일</b>을 쓰거나 조금 더 가까이(2배 줌으로) 다시 찍으세요.</p></details>
+  <details><summary>아이폰 사진(HEIC)이 안 열려요</summary>
+    <p>아이폰의 사파리에서는 그대로 열립니다. 아이폰 사진을 <b>윈도우 PC로 옮겨 크롬·엣지</b>에서 열면 HEIC를 읽지 못합니다. 아이폰 설정 → 카메라 → 포맷 → <b>높은 호환성</b>으로 찍거나, JPG로 바꿔 넣어 주세요.</p></details>
+  <details><summary>셀카가 좌우로 뒤집혀 보여요</summary>
+    <p>전면 카메라는 거울처럼 뒤집어 저장하는 폰이 있습니다. 가르마나 점 위치가 실제와 반대라면 「좌우 반전」을 누르세요. 실제 얼굴과 같은 방향이어야 합니다.</p></details>
+</section>
+
+<div class="nbx">
+  <div class="nbx-h"><span class="ic">!</span>꼭 확인하세요</div>
+  <ul>
+    <li>이 도구는 <b>크기와 위치를 맞춰 주는 것</b>이지, 사진이 심사를 통과한다고 보장하지 않습니다. 표정·조명·그림자·안경 반사·촬영 시기(6개월 이내)는 <b>직접 확인</b>해야 하며, 최종 판단은 접수 기관이 합니다.</li>
+    <li>여권·신분증 사진은 <b>보정·배경 합성·AI 편집</b>을 하면 반려될 수 있습니다. 이 도구는 자르기·크기·기울기만 바꾸고 색이나 얼굴은 건드리지 않습니다.</li>
+    <li>규격은 기관이 바꿀 수 있습니다. <b>제출처의 최신 안내</b>가 이 페이지와 다르면 제출처를 따르세요.</li>
+    <li>인화 업체·프린터 설정(꽉 채우기·자동 맞춤)에 따라 크기가 조금 달라질 수 있습니다. 사진 아래 10mm 눈금으로 크기를 먼저 확인하세요.</li>
+    <li>다른 사람의 사진으로 증명사진을 만들어 신분을 속이는 데 쓰면 법적 처벌을 받을 수 있습니다. <b>본인 또는 허락받은 사진</b>만 쓰세요.</li>
+  </ul>
+  <p class="nbx-f">이 도구는 <b>있는 그대로 제공되며</b>, 사진 반려·재촬영·인화 비용 등 이를 사용해 발생한
+    어떠한 손해에 대해서도 <b>제작자와 운영자는 법적 책임을 지지 않습니다.</b></p>
+</div>
+
+<footer>
+  <b>증명사진 만들기</b> · 업로드 없이 브라우저에서 처리<br>
+  여권 · 주민등록증 · 운전면허 · 반명함 · 명함판 · 미국·중국 비자 · 외부 라이브러리 없음<br>
+  사진은 어디에도 전송·저장되지 않으며, 페이지를 연 뒤에는 인터넷 없이도 동작합니다.
+</footer>
+</div>
+
+<!-- 앱 안(네이버·카카오톡 등)에서 열렸을 때 사용을 막는 창.
+     WebView 는 파일 내려받기를 못 해서, 다 맞춰도 저장이 안 된다 -->
+<div class="iamodal" id="iaModal" role="dialog" aria-modal="true" aria-labelledby="iaTitle">
+  <div class="iasheet">
+    <div class="iaic">📱</div>
+    <h2 id="iaTitle">앱 안에서는 만든 증명사진을 저장할 수 없습니다</h2>
+    <p class="iap" id="iaDesc"></p>
+    <ol class="iasteps" id="iaSteps"></ol>
+    <button class="iabtn" id="iaGo2" type="button">크롬에서 열기</button>
+    <p class="iafine"><button type="button" id="iaStay">저장은 안 해도 돼요 · 그냥 볼게요</button></p>
+  </div>
+</div>
+
+<!-- 광고 자리 ⑤ 하단 오버형 320×50(모바일) — 읽는 구간에서만 올라오고, 규격·사진·맞추기·저장 카드가 보일 때는
+     내려가 있습니다. 바 높이만큼 본문 아래 여백을 늘려 아무것도 가리지 않습니다 -->
+<div id="anchor"><span class="amk">광고</span><div class="ad-slot" id="ad-anchor"></div>
+  <button class="axl" id="anchorX" type="button" aria-label="광고 닫기">✕</button></div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+/* ════════════════════════════════════════════════════════════
+   증명사진 만들기 — 외부 라이브러리 없이 한 파일
+   · 길이는 전부 mm. 사진 위의 점(정수리·턱·얼굴 가운데)은 원본 픽셀 좌표로 들고 있다
+   · 배치는 「원본 픽셀 → 사진 틀 mm」 닮음 변환 하나: 크기 k(mm/px)·기울기 th·좌우 반전·머리 가운데가 갈 자리 (ax, ay)
+   · 화면·저장 모두 같은 변환을 쓰고, 크게 줄일 때는 반씩 줄인 사본(mip)에서 그린다(계단 현상 방지)
+   · 색·밝기·배경은 건드리지 않는다 — 여권 규정이 보정·배경 합성을 받지 않는다
+   ════════════════════════════════════════════════════════════ */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const sleep0 = () => new Promise(r => setTimeout(r, 0));
+const f1 = x => (Math.round(x * 10) / 10).toFixed(1);
+const fmm = x => String(Math.round(x * 10) / 10);
+const escH = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const DPI = 300, PPM = DPI / 25.4;
+const SRC_CAP = 2600;
+function fmtSize(b) { return b < 1024 ? b + 'B' : b < 1048576 ? Math.round(b / 1024) + 'KB' : (b / 1048576).toFixed(1) + 'MB'; }
+function toast(msg, ms) {
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), ms || 2600);
+}
+
+/* ══ 규격 ══
+   head: 정수리~턱(mm) 허용 범위, top: 사진 위 끝~정수리(mm) 권장 범위, topT: 맞출 때 쓰는 값
+   px: 파일로 낼 때 기본 픽셀, kb: 용량 상한(없으면 null), white: 흰 배경이 규정인가 */
+const SPEC = {
+  passport: { name: '여권', sub: '3.5×4.5cm', w: 35, h: 45, head: [32, 36], top: [2, 6], topT: 4, px: [413, 531], kb: 500, white: true, official: true,
+    rules: ['정수리부터 턱까지 <b>3.2~3.6cm</b>', '<b>흰색</b> 배경 · 테두리 없음', '6개월 이내 · 모자 없이 상반신 정면', '입 다물고 무표정(치아 보이면 안 됨)',
+      '머리카락이 눈썹·얼굴 윤곽을 가리면 안 됨', '컬러·서클렌즈, 색안경 안 됨 · 안경 반사 없게', '<b>보정·배경 합성 안 됨</b>(AI 편집 포함)', '36개월 이하 아기는 입 조금 벌려도 됨'],
+    digital: '정부24 온라인 재발급 파일은 <b>413×531픽셀 권장</b>(가로 395~431·세로 507~550), JPG, <b>500KB 이하</b>입니다.', src: '외교부 여권안내' },
+  idcard: { name: '주민등록증', sub: '3.5×4.5cm', w: 35, h: 45, head: [32, 36], top: [2, 6], topT: 4, px: [413, 531], kb: 500, white: true, official: true,
+    rules: ['여권 사진과 <b>같은 규격</b>(3.5×4.5cm)', '6개월 이내 · 상반신 정면 · 모자 없이', '<b>흰색</b> 배경 · 그림자 없게', '머리 길이 3.2~3.6cm로 맞추면 여권에도 그대로 씀', '보정·배경 합성 사진은 반려될 수 있음'],
+    digital: '주민센터에 낼 때는 인화한 사진을, 온라인 신청은 사이트 안내 크기를 따릅니다. 여기서는 300dpi 413×531픽셀로 저장합니다.', src: '여권용 규격' },
+  driver: { name: '운전면허증', sub: '3.5×4.5cm', w: 35, h: 45, head: [32, 36], top: [2, 6], topT: 4, px: [350, 450], kb: null, white: true, official: true,
+    rules: ['<b>여권용 규격</b> 적용(3.5×4.5cm)', '6개월 이내 · 상반신 정면 · 모자 없이', '흰 배경 · 그림자 없게', '포토샵 보정·풍경 사진 등록 시 발급이 거부될 수 있음'],
+    digital: '온라인(안전운전 통합민원) 등록 사진은 <b>350×450픽셀</b>(도로교통공단 2016년 공지)입니다. 사이트에 다른 안내가 있으면 「직접 넣기」로 맞추세요.', src: '도로교통공단' },
+  half: { name: '반명함', sub: '3×4cm', w: 30, h: 40, head: [25, 29], top: [2, 5.5], topT: 3.5, px: [354, 472], kb: null, white: false, official: false,
+    rules: ['이력서·학생증·사원증·각종 원서에 흔히 씀', '머리 길이 공식 기준 없음 — <b>2.5~2.9cm</b>를 권장으로', '배경색은 제출처 안내를 따름(흰색·연하늘·연회색)', '원서 사이트가 픽셀·용량을 정했으면 「직접 넣기」'],
+    digital: '300dpi로 354×472픽셀입니다. 원서 접수 사이트마다 픽셀·용량이 달라서, 안내가 있으면 저장할 때 「직접 넣기」에 적으세요.', src: '흔히 쓰는 크기' },
+  card: { name: '명함판', sub: '5×7cm', w: 50, h: 70, head: [33, 40], top: [4, 10], topT: 6.5, px: [591, 827], kb: null, white: false, official: false,
+    rules: ['상반신이 넓게 나오는 큰 사진', '머리 길이 공식 기준 없음 — <b>3.3~4.0cm</b>를 권장으로', '배경색은 제출처 안내를 따름'],
+    digital: '300dpi로 591×827픽셀입니다.', src: '흔히 쓰는 크기' },
+  us: { name: '미국 비자', sub: '2×2인치', w: 51, h: 51, head: [25, 35], top: [2, 8], topT: 5.7, px: [600, 600], kb: 240, white: true, official: true,
+    rules: ['정사각 <b>2×2인치(51×51mm)</b>', '정수리~턱 <b>25~35mm</b>(1~1⅜인치)', '눈 높이는 아래 끝에서 28~35mm', '흰색 배경', '<b>안경 착용 안 됨</b>', '6개월 이내 · 정면 · 무표정 또는 자연스러운 미소'],
+    digital: 'DS-160에 올리는 파일은 <b>600×600~1200×1200픽셀</b> 정사각, <b>240KB 이하</b> JPG입니다.', src: '미 국무부' },
+  cn: { name: '중국 비자', sub: '3.3×4.8cm', w: 33, h: 48, head: [28, 33], top: [3, 5], topT: 4, px: [390, 567], kb: null, white: true, official: true,
+    rules: ['<b>33×48mm</b>', '얼굴 세로 <b>28~33mm</b>', '머리 위 여백 <b>3~5mm</b>', '흰 배경 · 테두리 없음', '귀가 보이게 · 앞머리가 이마를 가리지 않게', '6개월 이내'],
+    digital: '온라인 신청 파일은 354×472픽셀 이상만 올라갑니다. 여기서는 300dpi 390×567픽셀로 저장합니다.', src: '비자센터 안내' },
+  custom: { name: '직접 입력', sub: 'mm 지정', w: 35, h: 45, head: [32, 36], top: [2, 6], topT: 4, px: [413, 531], kb: null, white: false, official: false,
+    rules: ['가로·세로를 mm로 넣으면 머리 길이를 세로의 <b>70~80%</b>로 맞춤', '픽셀은 300dpi 기준 — 저장할 때 「직접 넣기」로 바꿀 수 있음'],
+    digital: '', src: '직접 입력' }
+};
+const SPEC_KEYS = ['passport', 'idcard', 'driver', 'half', 'card', 'us', 'cn', 'custom'];
+function spec() {
+  const sp = SPEC[S.spec] || SPEC.passport;
+  if (S.spec !== 'custom') return sp;
+  const w = clamp(+S.cw || 35, 15, 120), h = clamp(+S.ch || 45, 15, 150);
+  return Object.assign({}, sp, { w, h, head: [h * .7, h * .8], top: [h * .04, h * .14], topT: h * .09,
+    px: [Math.round(w / 25.4 * DPI), Math.round(h / 25.4 * DPI)], sub: fmm(w / 10) + '×' + fmm(h / 10) + 'cm' });
+}
+const headT = sp => (sp.head[0] + sp.head[1]) / 2;
+
+/* ══ 설정 ══ */
+const DEF = { spec: 'passport', cw: 35, ch: 45, out: 'file', px: 'spec', pw: 413, ph: 531, kb: '', a4: 0, guides: true };
+const OPT_KEY = 'id_photo.opt';
+let S = Object.assign({}, DEF);
+function loadOpt() {
+  try { const o = JSON.parse(localStorage.getItem(OPT_KEY) || '{}'); if (o && typeof o === 'object') for (const k in DEF) if (k in o) S[k] = o[k]; } catch (e) { /* 무시 */ }
+  if (!SPEC[S.spec]) S.spec = 'passport';
+}
+function saveOpt() { try { localStorage.setItem(OPT_KEY, JSON.stringify(S)); } catch (e) { /* 무시 */ } }
+
+/* ══ 사진 ══ */
+let P = null;      /* { src(canvas), w, h, name, mips[], sample } */
+let mk = null;     /* { crown, chin, cx } 원본 픽셀 */
+let pl = { k: .06, th: 0, flip: false, ax: 17.5, ay: 22 };
+let mode = 'mark', busy = false, detected = false;
+
+async function decodeFile(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = url;
+    await img.decode();
+    const nw = img.naturalWidth, nh = img.naturalHeight;
+    if (!nw || !nh) throw new Error('size');
+    const k = Math.min(1, SRC_CAP / Math.max(nw, nh));
+    const cv = document.createElement('canvas');
+    cv.width = Math.max(1, Math.round(nw * k)); cv.height = Math.max(1, Math.round(nh * k));
+    const c = cv.getContext('2d');
+    c.imageSmoothingQuality = 'high';
+    c.drawImage(img, 0, 0, cv.width, cv.height);
+    return { cv, nw, nh };
+  } finally { URL.revokeObjectURL(url); }
+}
+function setPhoto(cv, name, o) {
+  P = { src: cv, w: cv.width, h: cv.height, name, mips: [cv], sample: !!(o && o.sample), orig: o && o.orig };
+  pl.th = 0; pl.flip = false;
+  if (o && o.marks) { mk = Object.assign({}, o.marks); detected = true; }
+  else { const d = detectFace(cv); mk = d.mk; detected = d.ok; }
+  mode = 'mark';
+  autoFit();
+  $('#pname').textContent = name + ' · ' + (o && o.orig ? o.orig : cv.width + '×' + cv.height);
+  $('#dropTxt').textContent = '다른 사진으로 바꾸기';
+  refreshAll();
+  if (!window.matchMedia('(min-width:980px)').matches) setTimeout(() => $('#edCard').scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+}
+async function addFile(list) {
+  const all = [...(list || [])];
+  const f = all.find(x => /^image\//.test(x.type) || /\.(jpe?g|png|webp|gif|bmp|heic|heif|avif)$/i.test(x.name));
+  if (!f) { if (all.length) toast('사진 파일이 아닙니다'); return; }
+  if (busy) return;
+  $('#dropTxt').textContent = '사진 읽는 중…';
+  try {
+    const r = await decodeFile(f);
+    setPhoto(r.cv, f.name, { orig: r.nw + '×' + r.nh });
+    toast(detected ? '얼굴 위치를 짐작해 두었습니다 — 파란 선(정수리)·빨간 선(턱)이 맞는지 확인하세요' : '얼굴을 찾지 못했습니다 — 선을 끌어 정수리와 턱에 맞춰 주세요', 4600);
+  } catch (e) {
+    const heic = /hei[cf]/i.test(f.type) || /\.hei[cf]$/i.test(f.name);
+    toast(heic ? 'HEIC 사진은 이 브라우저에서 열 수 없습니다 — 아이폰 사파리에서 열거나 JPG로 바꿔 넣어 주세요' : '사진을 열지 못했습니다(손상됐거나 지원하지 않는 형식)', 5600);
+    $('#dropTxt').textContent = P ? '다른 사진으로 바꾸기' : '사진 고르기 · 찍기';
+  }
+}
+
+/* 반씩 줄인 사본 — 크게 줄여 그릴 때 계단·모아레가 생기지 않게 */
+function mip(L) {
+  while (P.mips.length <= L) {
+    const a = P.mips[P.mips.length - 1];
+    const cv = document.createElement('canvas');
+    cv.width = Math.max(1, Math.round(a.width / 2)); cv.height = Math.max(1, Math.round(a.height / 2));
+    const c = cv.getContext('2d'); c.imageSmoothingQuality = 'high';
+    c.drawImage(a, 0, 0, cv.width, cv.height);
+    P.mips.push(cv);
+  }
+  return P.mips[L];
+}
+
+/* ══ 얼굴 위치 짐작 ══
+   피부색(YCbCr) 덩어리 중 가운데 큰 것을 얼굴로 보고, 줄마다 폭을 재서
+   턱 = 목(가장 좁은 줄)에서 위로 올라가며 폭이 다시 넓어지는 곳, 정수리 = 배경과 다른 첫 줄(머리카락 위)에서 조금 아래.
+   틀릴 수 있으므로 사용자가 선을 끌어 고친다 */
+function detectFace(src) {
+  const W = 240, H = Math.max(1, Math.round(src.height * W / src.width));
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const c = cv.getContext('2d', { willReadFrequently: true });
+  c.drawImage(src, 0, 0, W, H);
+  const d = c.getImageData(0, 0, W, H).data;
+  const sc = src.width / W;
+  const fallback = { ok: false, mk: { crown: src.height * .2, chin: src.height * .6, cx: src.width / 2 } };
+  const m = new Uint8Array(W * H);
+  for (let y = 0; y < H; y++) for (let x = Math.round(W * .1); x < Math.round(W * .9); x++) {
+    const i = (y * W + x) * 4, r = d[i], g = d[i + 1], b = d[i + 2];
+    const Y = .299 * r + .587 * g + .114 * b, cb = 128 - .168736 * r - .331264 * g + .5 * b, cr = 128 + .5 * r - .418688 * g - .081312 * b;
+    if (Y > 45 && cb >= 77 && cb <= 130 && cr >= 134 && cr <= 178 && r > g && r > b) m[y * W + x] = 1;
+  }
+  /* 덩어리 나누기 */
+  const lab = new Int32Array(W * H), st = [];
+  let best = null, nl = 0;
+  for (let p = 0; p < W * H; p++) {
+    if (!m[p] || lab[p]) continue;
+    nl++; lab[p] = nl; st.push(p);
+    let n = 0, sx = 0, sy = 0, x0 = W, x1 = 0, y0 = H, y1 = 0;
+    while (st.length) {
+      const q = st.pop(), x = q % W, y = (q - x) / W;
+      n++; sx += x; sy += y;
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      if (x > 0 && m[q - 1] && !lab[q - 1]) { lab[q - 1] = nl; st.push(q - 1); }
+      if (x < W - 1 && m[q + 1] && !lab[q + 1]) { lab[q + 1] = nl; st.push(q + 1); }
+      if (y > 0 && m[q - W] && !lab[q - W]) { lab[q - W] = nl; st.push(q - W); }
+      if (y < H - 1 && m[q + W] && !lab[q + W]) { lab[q + W] = nl; st.push(q + W); }
+    }
+    if (n < W * H * .004) continue;
+    const cxn = sx / n / W, cyn = sy / n / H;
+    const score = n * (1 - Math.min(.8, Math.abs(cxn - .5) * 1.6)) * (cyn < .75 ? 1 : .4);
+    if (!best || score > best.score) best = { id: nl, n, score, cx: sx / n, x0, x1, y0, y1 };
+  }
+  if (!best) return fallback;
+  /* 줄마다 폭 */
+  const wr = [];
+  for (let y = best.y0; y <= best.y1; y++) {
+    let a = -1, b = -1, cnt = 0;
+    for (let x = best.x0; x <= best.x1; x++) if (lab[y * W + x] === best.id) { if (a < 0) a = x; b = x; cnt++; }
+    wr.push(cnt ? { y, w: cnt, mid: (a + b) / 2 } : { y, w: 0, mid: best.cx });
+  }
+  const sm = wr.map((r, i) => { let s = 0, k = 0; for (let j = Math.max(0, i - 2); j <= Math.min(wr.length - 1, i + 2); j++) { s += wr[j].w; k++; } return s / k; });
+  const span = wr.length;
+  let mi = 0;
+  for (let i = 0; i < Math.round(span * .6); i++) if (sm[i] > sm[mi]) mi = i;
+  const maxW = sm[mi];
+  if (maxW < W * .06) return fallback;
+  let faceTop = 0;
+  while (faceTop < span && sm[faceTop] < maxW * .35) faceTop++;
+  /* 턱: 가장 넓은 줄 아래에서 가장 좁은 곳(목)을 찾고, 거기서 위로 올라가며 목 폭의 1.2배를 넘는 첫 줄.
+     귀까지 피부로 잡혀 「가장 넓은 폭」이 부풀어도 목 폭은 흔들리지 않는다 */
+  let ni = -1;
+  for (let i = mi + 2; i < span; i++) if (sm[i] > 0 && (ni < 0 || sm[i] < sm[ni])) ni = i;
+  let chinI = -1;
+  if (ni > mi + 2 && sm[ni] < maxW * .6) {
+    for (let i = ni; i > mi; i--) if (sm[i] > sm[ni] * 1.1 && sm[i - 1] > sm[ni] * 1.1) { chinI = i; break; }
+  }
+  const topY = best.y0 + faceTop;
+  /* 둥근 턱 끝은 목 폭 안으로 조금 더 내려간다 — 얼굴 길이의 4%쯤 */
+  let chinY = chinI >= 0 ? best.y0 + chinI : topY + maxW * 1.2;
+  if (chinI >= 0) chinY += (chinY - topY) * .04;
+  /* 얼굴 가운데: 위쪽 절반 줄들의 가운데 평균 */
+  let cs = 0, cn = 0;
+  for (let i = faceTop; i < Math.min(span, faceTop + Math.round((chinY - topY) * .7)); i++) if (wr[i].w > maxW * .5) { cs += wr[i].mid; cn++; }
+  const cx = cn ? cs / cn : best.cx;
+  /* 정수리: 위 모서리 배경색과 다른 첫 줄(머리카락 위 끝) */
+  const bg = [0, 0, 0]; let bn = 0;
+  for (let y = 0; y < Math.max(2, Math.round(H * .06)); y++) for (const x0 of [0, W - Math.round(W * .08)]) for (let x = x0; x < x0 + Math.round(W * .08); x++) {
+    const i = (y * W + x) * 4; bg[0] += d[i]; bg[1] += d[i + 1]; bg[2] += d[i + 2]; bn++;
+  }
+  bg[0] /= bn; bg[1] /= bn; bg[2] /= bn;
+  const hw = maxW * .45;
+  let hairTop = -1;
+  for (let y = 0; y < topY; y++) {
+    let k = 0, t = 0;
+    for (let x = Math.round(cx - hw); x <= Math.round(cx + hw); x++) {
+      if (x < 0 || x >= W) continue;
+      const i = (y * W + x) * 4; t++;
+      if (Math.abs(d[i] - bg[0]) + Math.abs(d[i + 1] - bg[1]) + Math.abs(d[i + 2] - bg[2]) > 70) k++;
+    }
+    if (t && k / t > .3) { hairTop = y; break; }
+  }
+  const byFace = topY - (chinY - topY) * .25;
+  let crown = byFace;
+  if (hairTop >= 0 && hairTop < topY && topY - hairTop < maxW * .9) crown = hairTop + (chinY - hairTop) * .035;
+  if (chinY - crown < maxW * .9) return fallback;
+  return { ok: true, mk: { crown: crown * sc, chin: chinY * sc, cx: cx * sc } };
+}
+
+/* ══ 배치 ══ 원본 픽셀 → 사진 틀 mm */
+function autoFit() {
+  if (!mk) return;
+  const sp = spec(), h = headT(sp);
+  pl.k = h / Math.max(1, mk.chin - mk.crown);
+  pl.ax = sp.w / 2;
+  pl.ay = sp.topT + h / 2;
+}
+const kAuto = () => mk ? headT(spec()) / Math.max(1, mk.chin - mk.crown) : 1;
+function mat() {
+  const t = pl.th * Math.PI / 180, co = Math.cos(t), si = Math.sin(t), F = pl.flip ? -1 : 1, k = pl.k;
+  const a = k * co * F, b = k * si * F, c = -k * si, d = k * co;
+  const px = mk.cx, py = (mk.crown + mk.chin) / 2;
+  return { a, b, c, d, e: pl.ax - (a * px + c * py), f: pl.ay - (b * px + d * py) };
+}
+const ap = (m, x, y) => ({ x: m.a * x + m.c * y + m.e, y: m.b * x + m.d * y + m.f });
+function inv(m) {
+  const det = m.a * m.d - m.b * m.c;
+  return { a: m.d / det, b: -m.b / det, c: -m.c / det, d: m.a / det, e: (m.c * m.f - m.d * m.e) / det, f: (m.b * m.e - m.a * m.f) / det };
+}
+/* 원본을 sx·sy(px/mm) 배율로, (ox, oy) 만큼 밀어 그린다 */
+function drawSrc(ctx, m, sx, sy, ox, oy) {
+  const scale = Math.abs(pl.k) * Math.max(sx, sy);
+  let L = 0;
+  while (L < 6 && scale * Math.pow(2, L + 1) <= 1 && P.w / Math.pow(2, L + 1) > 16) L++;
+  const im = mip(L), rx = P.w / im.width, ry = P.h / im.height;
+  ctx.save();
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.setTransform(sx * m.a * rx, sy * m.b * rx, sx * m.c * ry, sy * m.d * ry, sx * m.e + ox, sy * m.f + oy);
+  ctx.drawImage(im, 0, 0);
+  ctx.restore();
+}
+/* 규격 틀 안을 사진이 다 덮는가 — 덮지 못한 넓이(%) */
+function uncovered() {
+  const sp = spec(), iv = inv(mat());
+  const N = 24;
+  let miss = 0;
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+    const fx = (i + .5) / N * sp.w, fy = (j + .5) / N * sp.h;
+    const x = iv.a * fx + iv.c * fy + iv.e, y = iv.b * fx + iv.d * fy + iv.f;
+    if (x < -.5 || y < -.5 || x > P.w + .5 || y > P.h + .5) miss++;
+  }
+  return miss / (N * N) * 100;
+}
+/* 저장용 사진 한 장 */
+function renderPhoto(wpx, hpx) {
+  const sp = spec(), cv = document.createElement('canvas');
+  cv.width = wpx; cv.height = hpx;
+  const c = cv.getContext('2d');
+  c.fillStyle = '#fff'; c.fillRect(0, 0, wpx, hpx);
+  drawSrc(c, mat(), wpx / sp.w, hpx / sp.h, 0, 0);
+  return cv;
+}
+
+/* ══ 측정·점검 ══ */
+function measure() {
+  const sp = spec(), m = mat();
+  const a = ap(m, mk.cx, mk.crown), b = ap(m, mk.cx, mk.chin);
+  return { head: pl.k * (mk.chin - mk.crown), top: Math.min(a.y, b.y), ctr: (a.x + b.x) / 2 - sp.w / 2,
+    chinY: Math.max(a.y, b.y), dpi: 25.4 / pl.k, miss: uncovered(), sp };
+}
+function bgCheck() {
+  const sp = spec(), W = 120, H = Math.round(W * sp.h / sp.w);
+  const cv = renderPhoto(W, H), c = cv.getContext('2d', { willReadFrequently: true });
+  const d = c.getImageData(0, 0, W, H).data, me = measure(), ppm = W / sp.w;
+  const topPx = Math.floor((me.top - 1.2) * ppm), sidePx = Math.round(W * .1), lowPx = Math.round(me.top * ppm + (me.chinY - me.top) * ppm * .55);
+  let n = 0, sY = 0, sY2 = 0, sC = 0;
+  const take = (x, y) => {
+    const i = (y * W + x) * 4, r = d[i], g = d[i + 1], b = d[i + 2], Y = .299 * r + .587 * g + .114 * b;
+    n++; sY += Y; sY2 += Y * Y; sC += Math.max(r, g, b) - Math.min(r, g, b);
+  };
+  for (let y = 0; y < Math.max(0, topPx); y++) for (let x = 0; x < W; x++) take(x, y);
+  for (let y = Math.max(0, topPx); y < Math.min(H, lowPx); y++) { for (let x = 0; x < sidePx; x++) take(x, y); for (let x = W - sidePx; x < W; x++) take(x, y); }
+  if (n < 30) return null;
+  const mY = sY / n, sd = Math.sqrt(Math.max(0, sY2 / n - mY * mY)), ch = sC / n;
+  return { mY, sd, ch, cls: (mY >= 222 && ch <= 16 && sd <= 14) ? 'white' : (mY >= 190 && ch <= 30 && sd <= 28) ? 'light' : 'other' };
+}
+function checks() {
+  const me = measure(), sp = me.sp, out = [];
+  const hl = sp.head[0], hh = sp.head[1];
+  const hOk = me.head >= hl - .05 && me.head <= hh + .05;
+  out.push({ k: hOk ? 'ok' : (me.head >= hl - 1 && me.head <= hh + 1) ? 'warn' : 'bad',
+    t: '머리 길이 ' + f1(me.head) + 'mm', d: (sp.official ? '규정 ' : '권장 ') + fmm(hl) + '~' + fmm(hh) + 'mm' + (hOk ? '' : ' — 「크기」를 ' + (me.head < hl ? '키우세요' : '줄이세요')) });
+  const tOk = me.top >= sp.top[0] - .05 && me.top <= sp.top[1] + .05;
+  out.push({ k: tOk ? 'ok' : 'warn', t: '정수리 위 여백 ' + f1(me.top) + 'mm',
+    d: (S.spec === 'cn' ? '규정 ' : '권장 ') + fmm(sp.top[0]) + '~' + fmm(sp.top[1]) + 'mm' + (tOk ? '' : me.top < sp.top[0] ? ' — 얼굴이 너무 위에 있습니다' : ' — 얼굴이 아래로 내려가 있습니다') });
+  const c = Math.abs(me.ctr);
+  out.push({ k: c <= 1 ? 'ok' : c <= 2 ? 'warn' : 'bad', t: '좌우 가운데 ' + (c < .05 ? '딱 맞음' : (me.ctr > 0 ? '오른쪽으로 ' : '왼쪽으로 ') + f1(c) + 'mm'), d: '얼굴 가운데 선(초록)이 틀 가운데에 오게' });
+  if (me.miss > .2) out.push({ k: 'bad', t: '사진 밖이 틀에 들어왔습니다(' + Math.round(me.miss) + '%)', d: '그 부분은 흰색으로 채워집니다. 여권·신분증은 머리 위·어깨까지 넉넉히 찍은 사진으로 다시 하세요' });
+  else out.push({ k: 'ok', t: '틀 안이 모두 사진으로 채워짐', d: '' });
+  const dpi = me.dpi;
+  out.push({ k: dpi >= 280 ? 'ok' : dpi >= 200 ? 'warn' : 'bad', t: '해상도 ' + Math.round(dpi) + 'dpi' + (dpi >= 280 ? '' : ' — 원본이 작아요'),
+    d: dpi >= 280 ? '300dpi로 인화해도 선명합니다' : '얼굴 부분 픽셀이 모자랍니다. 메신저로 받은 사진이 아닌 원본 파일을 쓰거나 더 가까이 찍으세요' });
+  const bg = bgCheck();
+  if (bg) {
+    if (sp.white) out.push(bg.cls === 'white' ? { k: 'ok', t: '배경이 흰색으로 보입니다', d: '그림자·얼룩은 눈으로 한 번 더 확인하세요' }
+      : bg.cls === 'light' ? { k: 'warn', t: '배경이 회색빛·누런빛이거나 그림자가 있습니다', d: '흰 벽에서 50cm 떨어져, 창을 마주 보고 다시 찍으면 좋아집니다. 배경을 프로그램으로 바꾼 사진은 받지 않습니다' }
+      : { k: 'bad', t: '배경이 흰색이 아닌 것 같습니다', d: sp.name + ' 사진은 흰 배경이 규정입니다. 흰 벽이나 흰 천 앞에서 다시 찍으세요' });
+    else out.push({ k: 'info', t: '배경 ' + (bg.cls === 'white' ? '흰색' : bg.cls === 'light' ? '밝은 색' : '색 있음'), d: '반명함·명함판은 제출처가 정한 배경색을 따르세요' });
+  }
+  if (Math.abs(pl.th) >= .5) out.push({ k: 'info', t: '기울기 ' + (pl.th > 0 ? '+' : '') + pl.th + '° 바로잡음', d: '' });
+  if (pl.flip) out.push({ k: 'info', t: '좌우 반전함', d: '셀카가 거울처럼 저장된 경우에만 쓰세요' });
+  return { list: out, me };
+}
+
+/* ══ 편집 화면 ══ */
+let edScale = 1, edMg = 0, pvRaf = 0, dragLine = null, loupe = null;
+const DPR = () => Math.min(3, window.devicePixelRatio || 1);
+function edWidth() { const b = $('#edBox'); return Math.max(220, b.clientWidth - 22); }
+function edMaxH() { return Math.max(320, Math.min(window.innerHeight * .72, 640)); }
+function schedule() { if (pvRaf) return; pvRaf = requestAnimationFrame(() => { pvRaf = 0; drawEditor(); }); }
+function drawEditor() {
+  const cv = $('#ed'), c = cv.getContext('2d'), dpr = DPR();
+  cv.classList.toggle('mark', mode === 'mark' && !!P);
+  if (!P) {
+    const w = edWidth(), h = Math.round(w * .78);
+    cv.width = w * dpr; cv.height = h * dpr; cv.style.width = w + 'px'; cv.style.height = h + 'px';
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.fillStyle = getComputedStyle(document.body).getPropertyValue('--card2') || '#f5f8fc';
+    c.fillRect(0, 0, w, h);
+    const sp = spec(), fh = h * .62, fw = fh * sp.w / sp.h, x = (w - fw) / 2, y = (h - fh) / 2 - 8;
+    c.strokeStyle = '#9aa8bd'; c.setLineDash([5, 4]); c.lineWidth = 1.5; c.strokeRect(x, y, fw, fh); c.setLineDash([]);
+    c.fillStyle = '#c3cddb';
+    const hc = y + fh * (sp.topT + headT(sp) / 2) / sp.h, hr = fh * headT(sp) / sp.h / 2;
+    c.beginPath(); c.ellipse(w / 2, hc, hr * .74, hr, 0, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.ellipse(w / 2, y + fh + fh * .1, fw * .55, fh * .3, 0, Math.PI, 0); c.fill();
+    c.fillStyle = '#6b7a90'; c.font = '700 13px sans-serif'; c.textAlign = 'center';
+    c.fillText(sp.name + ' ' + sp.sub, w / 2, y + fh + 26);
+    return;
+  }
+  if (mode === 'mark') drawMark(cv, c, dpr); else drawFit(cv, c, dpr);
+}
+function drawMark(cv, c, dpr) {
+  const W = edWidth(), ds = Math.min(W / P.w, edMaxH() / P.h);
+  edScale = ds;
+  const w = Math.round(P.w * ds), h = Math.round(P.h * ds);
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  let L = 0; while (L < 6 && ds * dpr * Math.pow(2, L + 1) <= 1) L++;
+  const im = mip(L);
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.imageSmoothingQuality = 'high';
+  c.drawImage(im, 0, 0, cv.width, cv.height);
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const yC = mk.crown * ds, yH = mk.chin * ds, xC = mk.cx * ds;
+  /* 머리 영역 */
+  c.fillStyle = 'rgba(36,87,197,.10)'; c.fillRect(0, yC, w, yH - yC);
+  const line = (y, col, lab, on) => {
+    c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = on ? 5 : 4; c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke();
+    c.strokeStyle = col; c.lineWidth = on ? 3 : 2; c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke();
+    c.font = '800 12px sans-serif'; c.textAlign = 'left';
+    const tw = c.measureText(lab).width + 14;
+    c.fillStyle = col; rr(c, 6, y - 11, tw, 22, 11); c.fill();
+    c.fillStyle = '#fff'; c.fillText(lab, 13, y + 4.5);
+    /* 오른쪽 끝 손잡이 */
+    c.fillStyle = col; c.beginPath(); c.arc(w - 16, y, 10, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#fff'; c.lineWidth = 2; c.stroke();
+    c.beginPath(); c.moveTo(w - 20, y - 2); c.lineTo(w - 16, y - 6); c.lineTo(w - 12, y - 2); c.moveTo(w - 20, y + 2); c.lineTo(w - 16, y + 6); c.lineTo(w - 12, y + 2); c.stroke();
+  };
+  /* 얼굴 가운데 세로선 */
+  c.setLineDash([6, 5]);
+  c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 4; c.beginPath(); c.moveTo(xC, yC - 30); c.lineTo(xC, yH + 30); c.stroke();
+  c.strokeStyle = '#12a150'; c.lineWidth = dragLine === 'cx' ? 3 : 2; c.beginPath(); c.moveTo(xC, yC - 30); c.lineTo(xC, yH + 30); c.stroke();
+  c.setLineDash([]);
+  c.fillStyle = '#12a150'; c.beginPath(); c.arc(xC, yH + 30, 9, 0, Math.PI * 2); c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 2; c.stroke();
+  line(yC, '#2457c5', '① 정수리', dragLine === 'crown');
+  line(yH, '#d92d4a', '② 턱 끝', dragLine === 'chin');
+  if (loupe) drawLoupe(c, w, h);
+}
+function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+/* 끄는 동안 손가락에 가린 곳을 크게 보여 준다 */
+function drawLoupe(c, w, h) {
+  const R = 62, Z = 3, ds = edScale;
+  /* 손가락 반대쪽 옆, 끄는 선에서 먼 위·아래에 둔다 — 정수리를 끌 때 위에 두면 그 선을 가린다 */
+  const left = loupe.x > w / 2;
+  const lineY = dragLine === 'cx' ? loupe.y : dragLine === 'crown' ? mk.crown * ds : mk.chin * ds;
+  const cx = left ? R + 8 : w - R - 8, cy = lineY < h / 2 ? h - R - 8 : R + 8;
+  /* 정수리·턱은 얼굴 가운데 선 위의 점이라 손가락 위치가 아니라 가운데 선을 중심으로 보여 준다 */
+  const sy = dragLine === 'cx' ? loupe.y / ds : dragLine === 'crown' ? mk.crown : mk.chin;
+  const ux = mk.cx;
+  c.save();
+  c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.closePath();
+  c.fillStyle = '#fff'; c.fill(); c.clip();
+  const k = ds * Z;
+  c.imageSmoothingQuality = 'high';
+  const im = mip(0);
+  c.drawImage(im, cx - ux * k, cy - sy * k, P.w * k, P.h * k);
+  c.lineWidth = 2;
+  if (dragLine === 'cx') { c.strokeStyle = '#12a150'; c.beginPath(); c.moveTo(cx, cy - R); c.lineTo(cx, cy + R); c.stroke(); }
+  else { c.strokeStyle = dragLine === 'crown' ? '#2457c5' : '#d92d4a'; c.beginPath(); c.moveTo(cx - R, cy); c.lineTo(cx + R, cy); c.stroke(); }
+  c.restore();
+  c.strokeStyle = '#fff'; c.lineWidth = 3; c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.stroke();
+  c.strokeStyle = 'rgba(0,0,0,.35)'; c.lineWidth = 1; c.beginPath(); c.arc(cx, cy, R + 1.5, 0, Math.PI * 2); c.stroke();
+}
+function drawFit(cv, c, dpr) {
+  const sp = spec(), W = edWidth();
+  const mg = Math.max(sp.w, sp.h) * .2;
+  let v = W / (sp.w + 2 * mg);
+  if ((sp.h + 2 * mg) * v > edMaxH()) v = edMaxH() / (sp.h + 2 * mg);
+  edScale = v; edMg = mg;
+  const w = Math.round((sp.w + 2 * mg) * v), h = Math.round((sp.h + 2 * mg) * v);
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  const S2 = v * dpr;
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  /* 사진 밖은 회색 빗금 */
+  c.fillStyle = '#7d8696'; c.fillRect(0, 0, cv.width, cv.height);
+  c.strokeStyle = '#8c95a5'; c.lineWidth = 6 * dpr;
+  for (let x = -cv.height; x < cv.width; x += 18 * dpr) { c.beginPath(); c.moveTo(x, cv.height); c.lineTo(x + cv.height, 0); c.stroke(); }
+  drawSrc(c, mat(), S2, S2, mg * S2, mg * S2);
+  c.setTransform(v * dpr, 0, 0, v * dpr, mg * v * dpr, mg * v * dpr);
+  /* 틀 바깥 어둡게 */
+  c.fillStyle = 'rgba(10,18,32,.55)';
+  c.beginPath(); c.rect(-mg, -mg, sp.w + 2 * mg, sp.h + 2 * mg); c.rect(0, 0, sp.w, sp.h); c.fill('evenodd');
+  const px = 1 / v;
+  const me = measure();
+  if (S.guides) {
+    /* 정수리 자리(파랑 띠) · 턱 자리(빨강 띠) · 가운데 · 얼굴 윤곽 */
+    c.fillStyle = 'rgba(61,123,224,.22)'; c.fillRect(0, sp.top[0], sp.w, sp.top[1] - sp.top[0]);
+    c.fillStyle = 'rgba(217,45,74,.18)'; c.fillRect(0, me.top + sp.head[0], sp.w, sp.head[1] - sp.head[0]);
+    c.setLineDash([4 * px, 3 * px]); c.lineWidth = 1.2 * px;
+    c.strokeStyle = 'rgba(255,255,255,.9)'; c.beginPath(); c.moveTo(sp.w / 2, 0); c.lineTo(sp.w / 2, sp.h); c.stroke();
+    const ht = headT(sp);
+    c.beginPath(); c.ellipse(sp.w / 2, sp.topT + ht / 2, ht * .36, ht / 2, 0, 0, Math.PI * 2); c.stroke();
+    c.setLineDash([]);
+  }
+  /* 실제 정수리·턱 표시 */
+  const m = mat(), a = ap(m, mk.cx, mk.crown), b = ap(m, mk.cx, mk.chin);
+  const seg = (p, col) => {
+    const L = headT(sp) * .42;
+    c.lineWidth = 3.2 * px; c.strokeStyle = 'rgba(255,255,255,.9)'; c.beginPath(); c.moveTo(p.x - L, p.y); c.lineTo(p.x + L, p.y); c.stroke();
+    c.lineWidth = 1.8 * px; c.strokeStyle = col; c.beginPath(); c.moveTo(p.x - L, p.y); c.lineTo(p.x + L, p.y); c.stroke();
+  };
+  seg(a, '#2457c5'); seg(b, '#d92d4a');
+  /* 틀 테두리 */
+  c.lineWidth = 2 * px; c.strokeStyle = '#fff'; c.strokeRect(0, 0, sp.w, sp.h);
+  /* 오른쪽 바깥: 머리 길이 자 */
+  const xr = sp.w + mg * .32;
+  const ok = me.head >= sp.head[0] - .05 && me.head <= sp.head[1] + .05;
+  c.strokeStyle = ok ? '#5ee0a8' : '#ffb347'; c.lineWidth = 1.6 * px;
+  c.beginPath(); c.moveTo(xr, a.y); c.lineTo(xr, b.y); c.moveTo(xr - 4 * px, a.y); c.lineTo(xr + 4 * px, a.y); c.moveTo(xr - 4 * px, b.y); c.lineTo(xr + 4 * px, b.y); c.stroke();
+  c.save(); c.translate(xr + 7 * px, (a.y + b.y) / 2); c.rotate(-Math.PI / 2);
+  c.fillStyle = ok ? '#5ee0a8' : '#ffb347'; c.font = '800 ' + (12 * px) + 'px sans-serif'; c.textAlign = 'center';
+  c.fillText(f1(me.head) + 'mm', 0, 0); c.restore();
+  /* 위: 크기 */
+  c.fillStyle = '#fff'; c.font = '800 ' + (12 * px) + 'px sans-serif'; c.textAlign = 'center';
+  c.fillText(sp.name + ' ' + fmm(sp.w) + '×' + fmm(sp.h) + 'mm', sp.w / 2, -mg * .35);
+}
+
+/* ══ 화면 갱신 ══ */
+function paintSpec() {
+  const sp = spec();
+  $$('#segSpec button').forEach(b => b.classList.toggle('on', b.dataset.k === S.spec));
+  $('#customRow').classList.toggle('hide', S.spec !== 'custom');
+  $('#specOpt').textContent = sp.name + ' · ' + sp.sub;
+  $('#specInfo').innerHTML = '<b>' + sp.name + ' ' + fmm(sp.w) + '×' + fmm(sp.h) + 'mm</b> · 머리 길이 ' + fmm(sp.head[0]) + '~' + fmm(sp.head[1]) + 'mm' +
+    (sp.white ? ' · 흰 배경' : '') + (sp.digital ? '<br>' + sp.digital : '');
+  $('#specRules').innerHTML = sp.rules.map(r => '<li>' + r + '</li>').join('');
+}
+function specIcons() {
+  $('#segSpec').innerHTML = SPEC_KEYS.map(k => {
+    const s = SPEC[k];
+    return '<button type="button" data-k="' + k + '"><canvas width="80" height="80" data-k="' + k + '"></canvas>' + s.name + '<span class="s">' + s.sub + '</span></button>';
+  }).join('');
+  $$('#segSpec canvas').forEach(cv => {
+    const s = SPEC[cv.dataset.k], c = cv.getContext('2d'), W = 80;
+    const k = 62 / Math.max(s.w, s.h), w = s.w * k, h = s.h * k, x = (W - w) / 2, y = (W - h) / 2;
+    c.fillStyle = '#ffffff'; c.fillRect(x, y, w, h);
+    c.strokeStyle = '#8aa0c0'; c.lineWidth = 2; c.strokeRect(x + 1, y + 1, w - 2, h - 2);
+    const ht = (s.head[0] + s.head[1]) / 2 * k, hy = y + s.topT * k;
+    c.fillStyle = '#2b3445';
+    c.beginPath(); c.ellipse(W / 2, y + h + 2, w * .42, (h - (hy - y) - ht) * 1.25 + 6, 0, Math.PI, 0); c.fill();
+    c.fillStyle = '#f1c7a5';
+    c.beginPath(); c.ellipse(W / 2, hy + ht / 2, ht * .36, ht / 2, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#3a2a22';
+    c.beginPath(); c.ellipse(W / 2, hy + ht * .22, ht * .38, ht * .24, 0, Math.PI, 0); c.fill();
+    if (cv.dataset.k === 'custom') { c.fillStyle = '#2457c5'; c.font = '800 18px sans-serif'; c.textAlign = 'center'; c.fillText('?', W - 12, 20); }
+  });
+}
+function paintEditor() {
+  const has = !!P;
+  $$('#stepTab button').forEach(b => { b.classList.toggle('on', b.dataset.m === mode); b.disabled = !has; });
+  $('#markTools').classList.toggle('hide', !has || mode !== 'mark');
+  $('#fitTools').classList.toggle('hide', !has || mode !== 'fit');
+  $('#guideBtn').classList.toggle('on', S.guides);
+  if (!has) { $('#edHint').innerHTML = '사진을 넣으면 여기서 맞춥니다'; $('#edState').textContent = ''; drawEditor(); return; }
+  if (mode === 'mark') {
+    $('#edHint').innerHTML = '<b>파란 선</b>을 머리 꼭대기(머리카락 말고 두피)에, <b>빨간 선</b>을 턱 끝에, <b>초록 선</b>을 코·인중 가운데에 끌어 맞추세요' +
+      (P.sample ? '' : detected ? '<br>자동으로 짐작한 위치입니다 — 틀리면 끌어서 고치세요' : '<br>얼굴을 찾지 못해 기본 위치에 두었습니다');
+    $('#edState').textContent = '1단계';
+  } else {
+    $('#edHint').innerHTML = '사진을 <b>끌어서</b> 옮기고, <b>두 손가락·마우스 휠·크기 막대</b>로 키우거나 줄이세요';
+    $('#edState').textContent = '2단계';
+  }
+  const kz = pl.k / kAuto();
+  $('#zoom').value = String(kz); $('#zoomOut').textContent = Math.round(kz * 100) + '%';
+  $('#tilt').value = String(pl.th); $('#tiltOut').textContent = (pl.th > 0 ? '+' : '') + pl.th + '°';
+  $('#flipBtn').classList.toggle('on', pl.flip);
+  if (mode === 'fit') paintChecks();
+  drawEditor();
+}
+let chkT = 0;
+function paintChecks() {
+  if (!P || mode !== 'fit') return;
+  const r = checks(), me = r.me, sp = me.sp;
+  const cls = (v, a, b, tol) => v >= a - .05 && v <= b + .05 ? 'ok' : (v >= a - tol && v <= b + tol) ? 'warn' : 'bad';
+  $('#meas').innerHTML =
+    '<div class="' + cls(me.head, sp.head[0], sp.head[1], 1) + '"><span>머리 길이</span><b>' + f1(me.head) + '</b><i>' + fmm(sp.head[0]) + '~' + fmm(sp.head[1]) + 'mm</i></div>' +
+    '<div class="' + cls(me.top, sp.top[0], sp.top[1], 99) + '"><span>위 여백</span><b>' + f1(me.top) + '</b><i>' + fmm(sp.top[0]) + '~' + fmm(sp.top[1]) + 'mm</i></div>' +
+    '<div class="' + (me.dpi >= 280 ? 'ok' : me.dpi >= 200 ? 'warn' : 'bad') + '"><span>해상도</span><b>' + Math.round(me.dpi) + '</b><i>dpi · 300 이상</i></div>';
+  $('#checks').innerHTML = r.list.map(x => '<li class="' + x.k + '">' + escH(x.t) + (x.d ? '<i>' + escH(x.d) + '</i>' : '') + '</li>').join('');
+}
+function paintOut() {
+  const sp = spec(), has = !!P;
+  $$('#segOut button').forEach(b => b.classList.toggle('on', b.dataset.v === S.out));
+  $('#fileOpts').classList.toggle('hide', S.out !== 'file');
+  $('#a4Opts').classList.toggle('hide', S.out !== 'a4');
+  $('#pxSpecBtn').innerHTML = '규격대로<span class="s">' + sp.px[0] + '×' + sp.px[1] + '</span>';
+  $$('#segPx button').forEach(b => b.classList.toggle('on', b.dataset.v === S.px));
+  $('#pxCustom').classList.toggle('hide', S.px !== 'custom');
+  $('#kb').placeholder = sp.kb ? String(sp.kb) + ' (규격)' : '없음';
+  const lay4 = sheetLayout(sp), layA = a4Layout(sp);
+  const opts = [0, 8, 4, 2].filter(n => n === 0 || n < layA.n);
+  if (S.a4 && !opts.includes(S.a4)) S.a4 = 0;
+  $('#segA4').innerHTML = opts.map(n => '<button type="button" data-v="' + n + '" class="' + (S.a4 === n ? 'on' : '') + '">' + (n ? n + '장' : '가득 ' + layA.n + '장') + '</button>').join('');
+  let spec1 = '', note = '';
+  if (S.out === 'file') {
+    const [w, h] = filePx();
+    spec1 = '<span>픽셀 <b>' + w + '×' + h + '</b></span><span>' + sp.name + ' <b>' + fmm(sp.w) + '×' + fmm(sp.h) + 'mm</b></span><span>용량 <b>' + (kbLimit() ? kbLimit() + 'KB 이하' : '제한 없음') + '</b></span>';
+    $('#pxHint').textContent = Math.round(w / (sp.w / 25.4)) + 'dpi';
+    note = sp.digital ? sp.digital : '';
+    if (S.px === 'custom' && Math.abs(w / h - sp.w / sp.h) > .02) note = '넣은 픽셀의 비율(' + (w / h).toFixed(3) + ')이 ' + sp.name + ' 비율(' + (sp.w / sp.h).toFixed(3) + ')과 달라 위아래나 양옆이 더 들어갑니다.';
+  } else if (S.out === 'sheet') {
+    spec1 = '<span>4×6(10×15cm) 한 장에 <b>' + lay4.n + '장</b></span><span><b>1800×1200</b> · 300dpi</span><span>10mm 눈금 포함</span>';
+    note = '사진관·인화 앱에서 <b>4×6(10×15)</b>로 주문하고, <b>꽉 채우기·자동 보정은 끄세요.</b> 자를 선을 따라 자르면 ' + sp.sub + '입니다.';
+  } else {
+    const n = S.a4 || layA.n;
+    spec1 = '<span>A4 한 장에 <b>' + n + '장</b></span><span>실제 크기 PDF</span><span>자를 선·10mm 눈금</span>';
+    note = 'PDF를 열어 <b>실제 크기(100%)</b>로 인쇄하세요. 「페이지에 맞춤」이면 조금 작게 나옵니다.';
+  }
+  $('#outSpec').innerHTML = spec1;
+  $('#outNote').innerHTML = note;
+  $('#outOpt').textContent = has ? '' : '사진을 넣으면 저장할 수 있습니다';
+  $('#saveBtn').disabled = !has || busy;
+  $('#saveBtn').innerHTML = S.out === 'file' ? '사진 파일 저장<i>JPG</i>' : S.out === 'sheet' ? '4×6 인화용 저장<i>JPG ' + lay4.n + '장 배치</i>' : 'A4 PDF 저장<i>' + (S.a4 || layA.n) + '장 배치</i>';
+  scheduleOutPv();
+}
+let outT = 0;
+function scheduleOutPv() { clearTimeout(outT); outT = setTimeout(drawOutPv, 120); }
+function drawOutPv() {
+  const cv = $('#outPv'), c = cv.getContext('2d'), dpr = DPR(), sp = spec();
+  const boxW = Math.max(200, $('.outpv').clientWidth - 26);
+  if (S.out === 'file') {
+    const k = Math.min(150 / sp.h, 150 / sp.w), w = Math.round(sp.w * k), h = Math.round(sp.h * k);
+    cv.width = w * dpr; cv.height = h * dpr; cv.style.width = w + 'px'; cv.style.height = h + 'px';
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    if (P) { c.fillStyle = '#fff'; c.fillRect(0, 0, cv.width, cv.height); drawSrc(c, mat(), cv.width / sp.w, cv.height / sp.h, 0, 0); }
+    else { c.fillStyle = '#e8edf4'; c.fillRect(0, 0, cv.width, cv.height); }
+    return;
+  }
+  const lay = S.out === 'sheet' ? sheetLayout(sp) : a4Layout(sp);
+  const k = Math.min(boxW / lay.W, (S.out === 'sheet' ? 210 : 300) / lay.H);
+  const w = Math.round(lay.W * k), h = Math.round(lay.H * k);
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  drawSheet(c, lay, k * dpr, null);
+}
+
+/* ══ 종이에 배치 ══ */
+const PAPER46 = { W: 152.4, H: 101.6 };
+function packGrid(W, H, w, h, m, g, foot) {
+  const cols = Math.floor((W - 2 * m + g) / (w + g)), rows = Math.floor((H - 2 * m - foot + g) / (h + g));
+  if (cols < 1 || rows < 1) return null;
+  const gw = cols * w + (cols - 1) * g, gh = rows * h + (rows - 1) * g;
+  const x0 = (W - gw) / 2, y0 = Math.max(m, (H - foot - gh) / 2);
+  const slots = [];
+  for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) slots.push({ x: x0 + q * (w + g), y: y0 + r * (h + g), w, h });
+  return { W, H, slots, n: slots.length, x0, y0, gw, gh, foot, m, g };
+}
+function sheetLayout(sp) {
+  let best = null;
+  for (const [W, H] of [[PAPER46.W, PAPER46.H], [PAPER46.H, PAPER46.W]]) for (const [m, g] of [[3, 2], [2.5, 1.5], [2, 1.2]]) {
+    const L = packGrid(W, H, sp.w, sp.h, m, g, 0);
+    if (L && (!best || L.n > best.n)) best = L;
+  }
+  if (!best) best = { W: PAPER46.W, H: PAPER46.H, slots: [], n: 0 };
+  best.kind = 'sheet';
+  return best;
+}
+function a4Layout(sp, nWant) {
+  const L = packGrid(210, 297, sp.w, sp.h, 10, 3, 10) || { W: 210, H: 297, slots: [], n: 0 };
+  L.kind = 'a4';
+  if (nWant && nWant < L.n) { L.slots = L.slots.slice(0, nWant); }
+  return L;
+}
+/* 자를 선 — 사진 바깥(여백·사이)에만 짧게. 사진 위로는 긋지 않는다 */
+function cutMarks(lay) {
+  const out = [], xs = new Set(), ys = new Set();
+  lay.slots.forEach(s => { xs.add(+s.x.toFixed(3)); xs.add(+(s.x + s.w).toFixed(3)); ys.add(+s.y.toFixed(3)); ys.add(+(s.y + s.h).toFixed(3)); });
+  const minX = Math.min(...lay.slots.map(s => s.x)), maxX = Math.max(...lay.slots.map(s => s.x + s.w));
+  const minY = Math.min(...lay.slots.map(s => s.y)), maxY = Math.max(...lay.slots.map(s => s.y + s.h));
+  const len = Math.min(4, Math.max(1.2, minY - .6));
+  const lenX = Math.min(4, Math.max(1.2, minX - .6));
+  /* 아래 여백에 글씨·눈금이 들어가면 아래쪽 세로 표시는 뺀다(글씨와 겹친다) — 위쪽 표시와 가는 테두리로 충분하다 */
+  const foot = lay.H - maxY >= 3.6;
+  xs.forEach(x => { out.push([x, minY - .6, x, minY - .6 - len]); if (!foot) out.push([x, maxY + .6, x, maxY + .6 + Math.min(len, lay.H - maxY - .8)]); });
+  ys.forEach(y => { out.push([minX - .6, y, minX - .6 - lenX, y]); out.push([maxX + .6, y, maxX + .6 + lenX, y]); });
+  return out;
+}
+function footText(sp, lay) {
+  return sp.name + ' ' + fmm(sp.w) + '×' + fmm(sp.h) + 'mm · ' + lay.slots.length + '장' + (lay.kind === 'sheet' ? ' · 4×6(10×15) 원본 크기로 인화' : ' · 실제 크기(100%)로 인쇄');
+}
+/* 화면 미리보기와 4×6 저장이 같이 쓰는 그리기(k = 출력 px/mm) */
+function drawSheet(c, lay, k, photoCv) {
+  const sp = spec();
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.fillStyle = '#fff'; c.fillRect(0, 0, Math.round(lay.W * k), Math.round(lay.H * k));
+  for (const s of lay.slots) {
+    if (photoCv) c.drawImage(photoCv, Math.round(s.x * k), Math.round(s.y * k), Math.round(s.w * k), Math.round(s.h * k));
+    else if (P) { c.save(); c.beginPath(); c.rect(s.x * k, s.y * k, s.w * k, s.h * k); c.clip(); c.fillStyle = '#fff'; c.fill(); drawSrc(c, mat(), k, k, s.x * k, s.y * k); c.restore(); }
+    else { c.fillStyle = '#e8edf4'; c.fillRect(s.x * k, s.y * k, s.w * k, s.h * k); }
+  }
+  if (!lay.slots.length) return;
+  /* 흰 배경 사진은 종이와 경계가 안 보인다 — 사진 바깥 0.15mm 에 아주 옅은 테두리(자를 때 기준) */
+  c.strokeStyle = '#d4d4d4'; c.lineWidth = Math.max(.5, .1 * k);
+  for (const s of lay.slots) c.strokeRect((s.x - .15) * k, (s.y - .15) * k, (s.w + .3) * k, (s.h + .3) * k);
+  c.strokeStyle = '#9a9a9a'; c.lineWidth = Math.max(.6, .15 * k);
+  c.beginPath();
+  for (const [x1, y1, x2, y2] of cutMarks(lay)) { c.moveTo(x1 * k, y1 * k); c.lineTo(x2 * k, y2 * k); }
+  c.stroke();
+  /* 아래 여백: 글씨 + 10mm 눈금(크기 확인용) */
+  const maxY = Math.max(...lay.slots.map(s => s.y + s.h)), room = lay.H - maxY;
+  if (room >= 3.6) {
+    const fy = maxY + Math.min(room * .55, 6.5), th = Math.min(2.1, room * .36);
+    const x0 = Math.min(...lay.slots.map(s => s.x));
+    drawRuler(c, k, x0, fy, th);
+    c.fillStyle = '#555'; c.font = '600 ' + (th * k) + 'px "Malgun Gothic","Apple SD Gothic Neo",sans-serif'; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+    c.fillText(footText(sp, lay), (x0 + 13) * k, fy * k);
+  }
+}
+function drawRuler(c, k, x, y, th) {
+  c.strokeStyle = '#333'; c.lineWidth = Math.max(.6, .12 * k);
+  c.beginPath();
+  c.moveTo(x * k, y * k); c.lineTo((x + 10) * k, y * k);
+  for (let i = 0; i <= 10; i++) { const t = i % 5 === 0 ? th * .9 : th * .5; c.moveTo((x + i) * k, y * k); c.lineTo((x + i) * k, (y - t) * k); }
+  c.stroke();
+  c.fillStyle = '#333'; c.font = '700 ' + (th * .62 * k) + 'px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'top';
+  c.fillText('10mm', (x + 5) * k, (y + .25) * k);
+  c.textBaseline = 'alphabetic';
+}
+
+/* ══ 파일 쓰기 ══ */
+function canvasBytes(cv, type, q) {
+  return new Promise((res, rej) => cv.toBlob(b => b ? b.arrayBuffer().then(a => res(new Uint8Array(a)), rej) : rej(new Error('이미지를 만들지 못했습니다')), type, q));
+}
+/* JPEG 에 dpi 를 적어 둔다 — 문서에 넣거나 인쇄할 때 실제 크기로 잡힌다 */
+function jpegDpi(u, dpi) {
+  if (u[0] !== 0xFF || u[1] !== 0xD8) return u;
+  if (u[2] === 0xFF && u[3] === 0xE0 && u[6] === 0x4A && u[7] === 0x46 && u[8] === 0x49 && u[9] === 0x46) {
+    u[13] = 1; u[14] = dpi >> 8; u[15] = dpi & 255; u[16] = dpi >> 8; u[17] = dpi & 255;
+    return u;
+  }
+  const app0 = new Uint8Array([0xFF, 0xE0, 0, 16, 0x4A, 0x46, 0x49, 0x46, 0, 1, 1, 1, dpi >> 8, dpi & 255, dpi >> 8, dpi & 255, 0, 0]);
+  const out = new Uint8Array(u.length + app0.length);
+  out.set(u.subarray(0, 2), 0); out.set(app0, 2); out.set(u.subarray(2), 2 + app0.length);
+  return out;
+}
+/* 용량 상한이 있으면 품질을 이분 탐색으로 낮춘다(화질은 가능한 한 높게) */
+async function jpegFit(cv, kbMax, dpi) {
+  let u = jpegDpi(await canvasBytes(cv, 'image/jpeg', .95), dpi);
+  if (!kbMax || u.length <= kbMax * 1024) return { u, q: .95 };
+  let lo = .3, hi = .95, best = null;
+  for (let i = 0; i < 8; i++) {
+    const q = (lo + hi) / 2, t = jpegDpi(await canvasBytes(cv, 'image/jpeg', q), dpi);
+    if (t.length <= kbMax * 1024) { best = { u: t, q }; lo = q; } else hi = q;
+  }
+  if (!best) { const t = jpegDpi(await canvasBytes(cv, 'image/jpeg', .3), dpi); return { u: t, q: .3, over: t.length > kbMax * 1024 }; }
+  return best;
+}
+const te8 = new TextEncoder();
+/* ══ 인앱 브라우저 ══
+     ① 앱 안에서 열리면 사용을 막는 창을 띄워 브라우저를 옮기게 한다
+     ② 그래도 저장을 누르면 blob: 대신 data: 주소로 시도한다(10MB 까지)
+     ③ 아이폰은 사파리를 강제로 열 수 없어 주소 복사 + 메뉴 안내로 간다 */
+const UA = navigator.userAgent || '';
+const IA = {
+  naver: /NAVER\(inapp/i.test(UA),
+  kakao: /KAKAOTALK/i.test(UA),
+  line: /\bLine\//i.test(UA),
+  ios: /iPhone|iPad|iPod/i.test(UA),
+  android: /Android/i.test(UA)
+};
+IA.on = IA.naver || IA.kakao || IA.line ||
+  /Instagram|FBAN|FBAV|FB_IAB|DaumApps|everytimeApp|band\/|KAKAOSTORY/i.test(UA) ||
+  (IA.android && /;\s*wv\)/i.test(UA));
+const IA_MAX = 10 * 1048576;
+function externalUrl() {
+  const url = location.href;
+  if (IA.kakao) return 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url);
+  if (IA.line) return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'openExternalBrowser=1';
+  if (IA.android) return 'intent://' + url.replace(/^https?:\/\//i, '') +
+    '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(url) + ';end';
+  return '';
+}
+function copyAddr(guide) {
+  const url = location.href;
+  const done = () => toast(guide ? '주소를 복사했습니다. 사파리를 열고 붙여 넣거나, 메뉴에서 「다른 브라우저로 열기」를 누르세요.' : '주소를 복사했습니다.', 5200);
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(url).then(done, () => fallbackCopy(url, done)); return; }
+  } catch (e) { /* 아래로 */ }
+  fallbackCopy(url, done);
+}
+function fallbackCopy(text, done) {
+  const t = document.createElement('textarea');
+  t.value = text; t.setAttribute('readonly', ''); t.style.cssText = 'position:fixed;left:-9999px;top:0';
+  document.body.appendChild(t); t.select(); t.setSelectionRange(0, text.length);
+  try { document.execCommand('copy'); done(); } catch (e) { toast('주소를 길게 눌러 복사해 주세요.', 4200); }
+  t.remove();
+}
+/* 저장은 전부 이 한 곳을 거친다. 막혔으면 false */
+function download(blob, name) {
+  if (IA.on) return downloadInApp(blob, name);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.rel = 'noopener';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return true;
+}
+function downloadInApp(blob, name) {
+  if (blob.size > IA_MAX) {
+    toast('앱 안에서는 10MB가 넘는 파일을 저장할 수 없습니다. 위쪽 「' + $('#iaGo').textContent + '」를 눌러 주세요.', 5600);
+    return false;
+  }
+  const go = href => {
+    const a = document.createElement('a');
+    a.href = href; a.download = name; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+  const fr = new FileReader();
+  fr.onload = () => { try { go(fr.result); } catch (e) { /* 안내로 넘어간다 */ } };
+  fr.onerror = () => toast('앱 안에서는 저장이 막혀 있습니다. 위쪽 「' + $('#iaGo').textContent + '」를 눌러 주세요.', 5200);
+  fr.readAsDataURL(blob);
+  return true;
+}
+
+/* ════════════════════════════════════════════════════════════
+   광고 — 한 화면에 4곳 (애드핏 운영정책: 한 페이지 4개 초과 게재 금지)
+     모바일  ① 맨 위 320×50   ③ 본문 320×100   ④ 완료 카드 300×250   ⑤ 하단 오버형 320×50
+     PC      ① 맨 위 320×50   ② 편집 카드 위 320×50   ③ 본문 320×100   ④ 완료 카드 300×250
+   지킨 것
+     · ins 를 자리마다 다 만든 뒤 ba.min.js 는 맨 끝에 딱 한 번 붙인다
+     · 규격을 고르고 사진을 맞추는 중·저장 카드를 보는 중에는 오버형을 내려 둔다(핵심 행동 중 광고 노출 금지)
+     · 완료 광고는 창으로 덮지 않고 본문에 카드로 펼친다(콘텐츠를 가리는 배치 금지)
+     · 앱 안에서 막는 창이 떠 있으면 광고를 부르지 않는다
+   ※ 단위 ID 는 애드핏에서 크기별로 따로 발급받아 아래 units 에만 적으면 된다.
+     DAN-XXXX… 로 남아 있는 자리는 점선 자리표시자만 그리고 요청은 보내지 않는다.
+   ════════════════════════════════════════════════════════════ */
+const AD = {
+  units: {
+    top:     { id: 'DAN-XXXXXXXXXXXXXXXX', w: 320, h: 50 },   /* 맨 위 · 모바일과 PC 크기가 같아 하나로 겸한다 */
+    side_pc: { id: 'DAN-XXXXXXXXXXXXXXXX', w: 320, h: 50 },   /* PC 편집 카드 위 (좁은 화면에서는 안 뜬다) */
+    mid:     { id: 'DAN-XXXXXXXXXXXXXXXX', w: 320, h: 100 },  /* 본문 중간 · 모바일·PC 같은 자리라 하나로 쓴다 */
+    done:    { id: 'DAN-XXXXXXXXXXXXXXXX', w: 300, h: 250 },  /* 저장 완료 카드 · 모바일·PC 공통 */
+    anchor:  { id: 'DAN-XXXXXXXXXXXXXXXX', w: 320, h: 50 }    /* 모바일 하단 오버형 (PC 에서는 안 뜬다) */
+  },
+  iframeOk: true,   /* iframe 안에서도 띄우려면 true (애드핏에서는 권하지 않음) */
+  popup: true,      /* 완료 카드 */
+  overlay: true,    /* 하단 오버형 */
+  init() {
+    if (this.started) return;
+    this.started = true;
+    this.off = window.top !== window.self && !this.iframeOk;
+    this.pc = window.matchMedia('(min-width:980px)').matches;
+    if (this.off) { document.body.classList.add('no-ad'); return; }
+    this.put($('#ad-top'), 'top');
+    if (this.pc) this.put($('#ad-side'), 'side_pc');
+    this.put($('#ad-mid'), 'mid');
+    /* 숨어 있는 자리(하단 오버형·완료 카드)는 화면에 나온 다음에 부른다 —
+       안 보이는 동안 부르면 보는 사람 없이 노출만 잡힌다 */
+    this.load();
+  },
+  put(box, key, preload) {
+    const u = this.units[key];
+    if (!box || !u || box.dataset.ad) return;
+    if (document.querySelectorAll('ins.kakao_ad_area').length >= 4) return;
+    box.dataset.ad = key;
+    box.style.width = u.w + 'px';
+    if (/XXXX/.test(u.id)) { box.style.height = u.h + 'px'; box.innerHTML = '<div class="ad-ph">광고 ' + u.w + ' × ' + u.h + '</div>'; return; }
+    box.style.minHeight = u.h + 'px';
+    /* 광고가 안 내려오면 빈 칸이 남는다 — 공식 콜백으로 접는다. 단위가 여럿이면 이름이 서로 달라야 한다 */
+    const fail = 'adNone_' + box.id.replace(/-/g, '_');
+    window[fail] = () => {
+      box.classList.add('ad-none');
+      if (key === 'anchor') { this.closed = true; this.sync(); }
+      if (key === 'done') { const d = $('#doneAd'); if (d) d.classList.add('ad-none'); }
+    };
+    const ins = document.createElement('ins');
+    ins.className = 'kakao_ad_area'; ins.style.display = 'none';
+    ins.setAttribute('data-ad-unit', u.id);
+    ins.setAttribute('data-ad-width', String(u.w));
+    ins.setAttribute('data-ad-height', String(u.h));
+    ins.setAttribute('data-ad-onfail', fail);
+    if (preload) ins.setAttribute('data-ad-preload', 'Y');
+    box.appendChild(ins);
+    this.need = true;
+  },
+  show(box, key) {
+    if (this.off || !this.started || !box || box.dataset.ad) return;
+    this.put(box, key, true);
+    this.load();
+    try {
+      const ins = box.querySelector('ins');
+      if (ins && window.adfit && typeof window.adfit.render === 'function') window.adfit.render(ins);
+    } catch (e) { /* 안 되면 0.7초 뒤 preload 차례가 채운다 */ }
+  },
+  load() {
+    if (!this.need || this.loaded) return;
+    this.loaded = true;
+    const s = document.createElement('script');
+    s.type = 'text/javascript'; s.async = true;
+    s.src = 'https://t1.kakaocdn.net/kas/static/ba.min.js';
+    document.body.appendChild(s);
+  },
+  onScreen(el) {
+    if (!el || el.classList.contains('hide')) return false;
+    const r = el.getBoundingClientRect();
+    return r.height > 0 && r.bottom > 0 && r.top < window.innerHeight;
+  },
+  /* 하단 오버형 — 읽는 구간(이럴 때 씁니다·규격표·찍는 법·자주 묻는 것·주의)에서만 올라온다.
+     규격·사진·맞추기·저장·완료 카드 가운데 하나라도 화면에 보이면 내린다 */
+  sync() {
+    if (this.off || this.pc || !this.overlay || !this.started) return;
+    const modal = document.body.classList.contains('ia-lock');
+    const ae = document.activeElement;
+    const typing = !!(ae && ae.closest && (ae.closest('#form') || ae.closest('#side')) &&
+      (/^(SELECT|TEXTAREA)$/.test(ae.tagName) || (ae.tagName === 'INPUT' && !/^(checkbox|radio|button|file|range|color)$/.test(ae.type))));
+    const working = ['#specCard', '#photoCard', '#edCard', '#outCard', '#doneCard'].some(s => this.onScreen($(s)));
+    const show = !this.closed && !modal && !typing && !working && window.scrollY > 320;
+    const was = document.body.classList.contains('anch');
+    const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+    $('#anchor').classList.toggle('on', show);
+    document.body.classList.toggle('anch', show);
+    /* 이미 맨 아래였으면 늘어난 여백만큼 다시 내려 마지막 줄이 바에 가리지 않게 */
+    if (show && !was && atBottom) window.scrollTo(0, document.documentElement.scrollHeight);
+    if (show) this.show($('#ad-anchor'), 'anchor');
+  },
+  done(msg, title, steps) {
+    if (!this.popup) return;
+    $('#doneMsg').innerHTML = msg;
+    $('#doneTitle').textContent = title || '저장했습니다';
+    $('#doneSteps').innerHTML = (steps || []).map(s => '<li>' + s + '</li>').join('');
+    $('#doneCard').classList.remove('hide');
+    if (!this.off) this.show($('#ad-done'), 'done');
+    clearTimeout(this.goT);
+    this.goT = setTimeout(() => {
+      $('#doneCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.sync();
+    }, 250);
+  },
+  hideDone() { $('#doneCard').classList.add('hide'); this.sync(); }
+};
+
+function initInApp() {
+  if (!IA.on) return;
+  const app = IA.naver ? (/NAVER\(inapp;\s*blog/i.test(UA) ? '네이버 블로그 앱' : '네이버 앱') : IA.kakao ? '카카오톡' : IA.line ? '라인' : '앱';
+  const copyOnly = IA.ios && !IA.kakao && !IA.line;
+  const chromeIntent = IA.android && !IA.kakao && !IA.line;
+  document.body.classList.add('inapp');
+  $('#iaMsg').textContent = app + ' 안에서는 만든 사진을 저장할 수 없습니다.';
+  $('#doneInapp').classList.remove('hide');
+  $('#iaDesc').innerHTML = '<b>' + app + '</b> 안에서 열렸습니다. 이 화면에서는 ' +
+    '<b>JPG·PDF를 내려받을 수 없습니다.</b> 얼굴을 다 맞춰도 저장할 수 없으니 ' +
+    '<b>사진을 넣기 전에</b> 브라우저를 옮겨 주세요.';
+  const steps = copyOnly
+    ? ['아래 <b>주소 복사</b>를 누르세요.',
+       '오른쪽 아래 <b>메뉴</b>에서 「다른 브라우저로 열기」를 누르거나, <b>사파리</b> 주소창에 붙여 넣으세요.']
+    : chromeIntent
+      ? ['아래 <b>크롬에서 열기</b>를 누르세요.',
+         '크롬이 없으면 오른쪽 위 <b>메뉴</b>에서 「다른 브라우저로 열기」를 누르세요.']
+      : ['아래 <b>다른 브라우저로 열기</b>를 누르세요.',
+         '열리지 않으면 ' + (IA.ios ? '화면의' : '오른쪽 위') + ' <b>메뉴</b>에서 「다른 브라우저로 열기」를 누르세요.'];
+  $('#iaSteps').innerHTML = steps.map(t => '<li>' + t + '</li>').join('');
+  const label = copyOnly ? '주소 복사' : chromeIntent ? '크롬에서 열기' : '다른 브라우저로 열기';
+  $('#iaGo').textContent = label; $('#iaGo2').textContent = label; $('#doneGo').textContent = label;
+  $('#iaSub').textContent = copyOnly
+    ? '사파리에 붙여 넣거나, 오른쪽 아래 메뉴에서 「다른 브라우저로 열기」를 누르세요.'
+    : '사진을 넣기 전에 옮기면 다시 고르지 않아도 됩니다.';
+  let hidden = false;
+  try { hidden = sessionStorage.getItem('id_photo.iahide') === '1'; } catch (e) { /* 무시 */ }
+  if (hidden) document.body.classList.remove('inapp');
+  lockInApp(true);
+}
+function lockInApp(on) {
+  document.body.classList.toggle('ia-lock', on);
+  const w = document.querySelector('.wrap');
+  if (on) w.setAttribute('inert', ''); else w.removeAttribute('inert');
+  if (!on) $('#iaModal').blur();
+}
+function iaCopied() {
+  $('#iaDesc').innerHTML = '주소를 <b>복사했습니다.</b> 이제 <b>사파리</b>를 열고 주소창에 붙여 넣으세요.';
+  $('#iaSteps').innerHTML = '<li>홈 화면에서 <b>사파리</b>를 엽니다.</li>' +
+    '<li>주소창을 길게 눌러 <b>붙여넣기</b> 하세요.</li>' +
+    '<li>또는 이 화면의 <b>메뉴</b> → 「다른 브라우저로 열기」.</li>';
+}
+
+/* ══ 저장 ══ */
+function filePx() {
+  const sp = spec();
+  if (S.px === 'custom') return [clamp(Math.round(+S.pw || sp.px[0]), 100, 3000), clamp(Math.round(+S.ph || sp.px[1]), 100, 4000)];
+  return sp.px;
+}
+function kbLimit() { const v = Math.round(+S.kb); if (v > 0) return clamp(v, 20, 5000); return spec().kb || 0; }
+const fileBase = () => spec().name.replace(/\s+/g, '') + '사진';
+function setBusy(on, txt) {
+  busy = on;
+  const b = $('#saveBtn');
+  if (on) { b.disabled = true; b.innerHTML = txt; } else paintOut();
+}
+async function save() {
+  if (!P || busy) return;
+  const sp = spec(), bad = checks().list.filter(x => x.k === 'bad');
+  setBusy(true, '만드는 중<i>…</i>');
+  await sleep0();
+  try {
+    if (S.out === 'file') {
+      const [w, h] = filePx(), lim = kbLimit();
+      const cv = renderPhoto(w, h);
+      const dpi = Math.round(w / (sp.w / 25.4));
+      const r = await jpegFit(cv, lim, dpi);
+      const name = fileBase() + '_' + w + 'x' + h + '.jpg';
+      const blob = new Blob([r.u], { type: 'image/jpeg' });
+      if (!download(blob, name)) return;
+      toast('저장했습니다 · ' + name + ' · ' + fmtSize(blob.size), 3400);
+      AD.done('「' + escH(name) + '」로 저장했습니다 — ' + w + '×' + h + '픽셀 · ' + fmtSize(blob.size) + (lim ? (r.over ? ' · <b>' + lim + 'KB를 넘었습니다</b>' : ' (' + lim + 'KB 이하)') : '') + '.',
+        '사진 파일을 저장했습니다', [
+          '제출하는 사이트에서 <b>이 JPG를 그대로</b> 올리세요. 다른 앱으로 다시 편집하면 크기·용량이 바뀝니다.',
+          sp.official ? '심사는 기관이 합니다 — <b>표정·그림자·안경 반사</b>를 한 번 더 보세요.' : '원서 사이트가 픽셀·용량을 따로 정했다면 「직접 넣기」로 다시 저장하세요.',
+          bad.length ? '<b>빨간 점검 항목 ' + bad.length + '개</b>가 남아 있습니다. 반려될 수 있으니 확인하세요.' : '휴대폰은 「파일」·「다운로드」 폴더에, PC는 다운로드 폴더에 있습니다.'
+        ]);
+    } else if (S.out === 'sheet') {
+      const lay = sheetLayout(sp), k = PPM;
+      const pw = Math.round(sp.w * k), ph = Math.round(sp.h * k);
+      const photo = renderPhoto(pw, ph);
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(lay.W * k); cv.height = Math.round(lay.H * k);
+      drawSheet(cv.getContext('2d'), lay, k, photo);
+      const u = jpegDpi(await canvasBytes(cv, 'image/jpeg', .95), DPI);
+      const name = fileBase() + '_4x6_' + lay.n + '장.jpg';
+      const blob = new Blob([u], { type: 'image/jpeg' });
+      if (!download(blob, name)) return;
+      toast('저장했습니다 · ' + name + ' · ' + fmtSize(blob.size), 3400);
+      AD.done('「' + escH(name) + '」로 저장했습니다 — 4×6 한 장에 ' + sp.name + ' 사진 ' + lay.n + '장.', '4×6 인화용을 저장했습니다', [
+        '사진관·인화 앱·편의점 사진 인화기에서 <b>4×6(10×15)</b> 크기로 뽑으세요.',
+        '<b>꽉 채우기(크롭)·자동 보정은 끄세요.</b> 켜면 크기가 조금 달라질 수 있습니다.',
+        '받은 사진의 <b>10mm 눈금</b>을 자로 재 보세요. 맞으면 자를 선을 따라 자릅니다.'
+      ]);
+    } else {
+      const lay = a4Layout(sp, S.a4 || 0), k = PPM;
+      const pw = Math.round(sp.w * k), ph = Math.round(sp.h * k);
+      const photo = renderPhoto(pw, ph);
+      const pj = jpegDpi(await canvasBytes(photo, 'image/jpeg', .95), DPI);
+      const maxY = Math.max(...lay.slots.map(s => s.y + s.h)), x0 = Math.min(...lay.slots.map(s => s.x));
+      const fy = maxY + 6, th = 2.1;
+      const text = footText(sp, lay);
+      const lc = document.createElement('canvas'), lk = 12;
+      const lctx = lc.getContext('2d');
+      lctx.font = '600 ' + (th * lk) + 'px "Malgun Gothic","Apple SD Gothic Neo",sans-serif';
+      const lw = Math.min(lay.W - x0 - 13 - 6, lctx.measureText(text).width / lk + 2), lh = th * 1.5;
+      lc.width = Math.ceil(lw * lk); lc.height = Math.ceil(lh * lk);
+      const l2 = lc.getContext('2d');
+      l2.fillStyle = '#fff'; l2.fillRect(0, 0, lc.width, lc.height);
+      l2.fillStyle = '#555'; l2.font = '600 ' + (th * lk) + 'px "Malgun Gothic","Apple SD Gothic Neo",sans-serif'; l2.textBaseline = 'alphabetic';
+      l2.fillText(text, 0, th * 1.05 * lk);
+      /* 눈금 아래 「10mm」 글씨도 그림에 같이 넣는다 */
+      const label = { data: await canvasBytes(lc, 'image/jpeg', .92), pw: lc.width, ph: lc.height, x: x0 + 13, y: fy - th * 1.05, w: lc.width / lk, h: lc.height / lk,
+        ruler: { x: x0, y: fy, th } };
+      const rc = document.createElement('canvas'); rc.width = 10 * lk; rc.height = Math.ceil(th * .9 * lk);
+      const r2 = rc.getContext('2d'); r2.fillStyle = '#fff'; r2.fillRect(0, 0, rc.width, rc.height);
+      r2.fillStyle = '#333'; r2.font = '700 ' + (th * .62 * lk) + 'px sans-serif'; r2.textAlign = 'center'; r2.textBaseline = 'top';
+      r2.fillText('10mm', 5 * lk, .1 * lk);
+      const tenmm = { data: await canvasBytes(rc, 'image/jpeg', .92), pw: rc.width, ph: rc.height };
+      const blob = buildA4Pdf(lay, { data: pj, w: pw, h: ph }, label, tenmm);
+      const name = fileBase() + '_A4_' + lay.slots.length + '장.pdf';
+      if (!download(blob, name)) return;
+      toast('저장했습니다 · ' + name + ' · ' + fmtSize(blob.size), 3400);
+      AD.done('「' + escH(name) + '」로 저장했습니다 — A4 한 장에 ' + sp.name + ' 사진 ' + lay.slots.length + '장.', 'A4 PDF를 저장했습니다', [
+        'PDF를 열어 인쇄할 때 <b>실제 크기(100%)</b>를 고르세요. 「페이지에 맞춤」이면 조금 작아집니다.',
+        '용지는 <b>포토용지</b>, 품질은 <b>높음</b>으로 두면 사진이 선명합니다.',
+        '인쇄한 <b>10mm 눈금</b>을 자로 재 보고, 맞으면 자를 선을 따라 자르세요.'
+      ]);
+    }
+  } catch (e) {
+    console.error(e);
+    toast('만들지 못했습니다 · ' + ((e && e.message) || e), 5200);
+  } finally { setBusy(false); }
+}
+/* A4 PDF — 사진 JPEG 하나를 여러 자리에 다시 쓰고, 자를 선·눈금은 선으로, 글씨는 작은 그림으로 */
+function buildA4Pdf(lay, photo, label, tenmm) {
+  const PT = 72 / 25.4, PH = lay.H, r = label.ruler;
+  const X = mm => (mm * PT).toFixed(3), Y = mm => ((PH - mm) * PT).toFixed(3);
+  const parts = [], offs = [];
+  let len = 0;
+  const push = x => { const u = typeof x === 'string' ? te8.encode(x) : x; parts.push(u); len += u.length; };
+  push('%PDF-1.4\n'); push(new Uint8Array([37, 226, 227, 207, 211, 10]));
+  const obj = (n, body) => { offs[n] = len; push(n + ' 0 obj\n'); for (const b of [].concat(body)) push(b); push('\nendobj\n'); };
+  let cs = '';
+  for (const s of lay.slots) cs += 'q ' + X(s.w) + ' 0 0 ' + (s.h * PT).toFixed(3) + ' ' + X(s.x) + ' ' + Y(s.y + s.h) + ' cm /Im0 Do Q\n';
+  cs += '0.83 G ' + (0.1 * PT).toFixed(3) + ' w\n';
+  for (const s of lay.slots) cs += X(s.x - .15) + ' ' + Y(s.y + s.h + .15) + ' ' + X(s.w + .3) + ' ' + ((s.h + .3) * PT).toFixed(3) + ' re S\n';
+  cs += '0.6 G ' + (0.15 * PT).toFixed(3) + ' w\n';
+  for (const [x1, y1, x2, y2] of cutMarks(lay)) cs += X(x1) + ' ' + Y(y1) + ' m ' + X(x2) + ' ' + Y(y2) + ' l S\n';
+  cs += '0.2 G ' + (0.12 * PT).toFixed(3) + ' w\n' + X(r.x) + ' ' + Y(r.y) + ' m ' + X(r.x + 10) + ' ' + Y(r.y) + ' l S\n';
+  for (let i = 0; i <= 10; i++) cs += X(r.x + i) + ' ' + Y(r.y) + ' m ' + X(r.x + i) + ' ' + Y(r.y - (i % 5 === 0 ? r.th * .9 : r.th * .5)) + ' l S\n';
+  cs += 'q ' + X(label.w) + ' 0 0 ' + (label.h * PT).toFixed(3) + ' ' + X(label.x) + ' ' + Y(label.y + label.h) + ' cm /Im1 Do Q\n';
+  const tw = 10, thh = tenmm.ph / tenmm.pw * 10;
+  cs += 'q ' + X(tw) + ' 0 0 ' + (thh * PT).toFixed(3) + ' ' + X(r.x) + ' ' + Y(r.y + .3 + thh) + ' cm /Im2 Do Q\n';
+  const csU = te8.encode(cs);
+  const img = (n, o) => obj(n, ['<< /Type /XObject /Subtype /Image /Width ' + o.w + ' /Height ' + o.h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + o.data.length + ' >>\nstream\n', o.data, '\nendstream']);
+  obj(1, '<< /Type /Catalog /Pages 2 0 R /ViewerPreferences << /PrintScaling /None >> >>');
+  obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+  obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + X(lay.W) + ' ' + (lay.H * PT).toFixed(3) + '] /Resources << /XObject << /Im0 5 0 R /Im1 6 0 R /Im2 7 0 R >> >> /Contents 4 0 R >>');
+  obj(4, ['<< /Length ' + csU.length + ' >>\nstream\n', csU, '\nendstream']);
+  img(5, photo);
+  img(6, { data: label.data, w: label.pw, h: label.ph });
+  img(7, { data: tenmm.data, w: tenmm.pw, h: tenmm.ph });
+  const nObj = 7, xref = len;
+  let x = 'xref\n0 ' + (nObj + 1) + '\n0000000000 65535 f \n';
+  for (let n = 1; n <= nObj; n++) x += String(offs[n]).padStart(10, '0') + ' 00000 n \n';
+  push(x + 'trailer\n<< /Size ' + (nObj + 1) + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF\n');
+  return new Blob(parts, { type: 'application/pdf' });
+}
+
+/* ══ 예시 사진 — 누가 봐도 그림인 사람(실존 인물 아님) ══ */
+function makeSample() {
+  const W = 1200, H = 1600, cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+  const g = c.createRadialGradient(W / 2, H * .45, 100, W / 2, H * .45, W * 1.1);
+  g.addColorStop(0, '#fdfdfd'); g.addColorStop(1, '#f0f0ef');
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  /* 상의 */
+  c.fillStyle = '#26324a';
+  c.beginPath(); c.moveTo(130, H); c.bezierCurveTo(150, 1260, 330, 1150, 520, 1110); c.lineTo(680, 1110); c.bezierCurveTo(870, 1150, 1050, 1260, 1070, H); c.closePath(); c.fill();
+  c.fillStyle = '#f7f7f7';
+  c.beginPath(); c.moveTo(520, 1110); c.lineTo(600, 1330); c.lineTo(680, 1110); c.closePath(); c.fill();
+  c.fillStyle = '#1b2436';
+  c.beginPath(); c.moveTo(520, 1110); c.lineTo(600, 1330); c.lineTo(560, 1340); c.lineTo(470, 1140); c.closePath(); c.fill();
+  c.beginPath(); c.moveTo(680, 1110); c.lineTo(600, 1330); c.lineTo(640, 1340); c.lineTo(730, 1140); c.closePath(); c.fill();
+  /* 목 */
+  c.fillStyle = '#e9b994'; c.fillRect(530, 900, 140, 230);
+  c.fillStyle = 'rgba(120,70,40,.18)'; c.beginPath(); c.ellipse(600, 975, 80, 40, 0, 0, Math.PI); c.fill();
+  /* 귀 */
+  c.fillStyle = '#efc09c';
+  c.beginPath(); c.ellipse(392, 712, 34, 62, 0, 0, Math.PI * 2); c.fill();
+  c.beginPath(); c.ellipse(808, 712, 34, 62, 0, 0, Math.PI * 2); c.fill();
+  /* 얼굴 */
+  c.fillStyle = '#f2c8a6';
+  c.beginPath(); c.moveTo(600, 438);
+  c.bezierCurveTo(745, 438, 812, 540, 808, 690); c.bezierCurveTo(804, 830, 720, 960, 600, 965);
+  c.bezierCurveTo(480, 960, 396, 830, 392, 690); c.bezierCurveTo(388, 540, 455, 438, 600, 438); c.fill();
+  /* 머리카락 */
+  c.fillStyle = '#2e221c';
+  c.beginPath(); c.moveTo(380, 690);
+  c.bezierCurveTo(360, 470, 470, 372, 600, 370); c.bezierCurveTo(730, 372, 840, 470, 820, 690);
+  c.bezierCurveTo(808, 600, 790, 540, 760, 520); c.bezierCurveTo(690, 560, 560, 548, 470, 512);
+  c.bezierCurveTo(420, 545, 398, 610, 380, 690); c.fill();
+  /* 눈썹·눈·코·입 */
+  c.strokeStyle = '#3a2a22'; c.lineWidth = 14; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(470, 615); c.quadraticCurveTo(515, 598, 560, 612); c.stroke();
+  c.beginPath(); c.moveTo(640, 612); c.quadraticCurveTo(685, 598, 730, 615); c.stroke();
+  for (const ex of [515, 685]) {
+    c.fillStyle = '#fff'; c.beginPath(); c.ellipse(ex, 672, 36, 19, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#3b2b23'; c.beginPath(); c.arc(ex, 672, 15, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#fff'; c.beginPath(); c.arc(ex + 5, 667, 4, 0, Math.PI * 2); c.fill();
+  }
+  c.strokeStyle = 'rgba(140,80,50,.55)'; c.lineWidth = 7;
+  c.beginPath(); c.moveTo(600, 690); c.quadraticCurveTo(588, 770, 600, 790); c.quadraticCurveTo(620, 796, 630, 786); c.stroke();
+  c.strokeStyle = '#b5615a'; c.lineWidth = 9;
+  c.beginPath(); c.moveTo(552, 862); c.quadraticCurveTo(600, 876, 648, 862); c.stroke();
+  /* 「예시」 표시 */
+  c.fillStyle = 'rgba(36,87,197,.75)'; c.font = '800 46px "Malgun Gothic",sans-serif'; c.textAlign = 'right';
+  c.fillText('예시 그림', W - 40, H - 44);
+  return cv;
+}
+function loadSample() {
+  setPhoto(makeSample(), '예시 사진(그림)', { sample: true, orig: '1200×1600', marks: { crown: 392, chin: 965, cx: 600 } });
+  toast('예시 그림을 넣었습니다 — 선을 끌어 보고, 「다음」을 누르세요', 3200);
+}
+
+/* ══ 손가락·마우스 ══ */
+function initPointer() {
+  const cv = $('#ed'), ptrs = new Map();
+  let drag = null;
+  const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const dist = () => { const a = [...ptrs.values()]; return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) || 1; };
+  cv.addEventListener('pointerdown', e => {
+    if (!P) { $('#file').click(); return; }
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    try { cv.setPointerCapture(e.pointerId); } catch (er) { /* 무시 */ }
+    if (mode === 'mark') {
+      const p = pos(e), ds = edScale;
+      const dC = Math.abs(p.y - mk.crown * ds), dH = Math.abs(p.y - mk.chin * ds), dX = Math.abs(p.x - mk.cx * ds);
+      const inBand = p.y > mk.crown * ds - 30 && p.y < mk.chin * ds + 42;
+      const cand = [['crown', dC], ['chin', dH]];
+      if (inBand) cand.push(['cx', dX + 4]);
+      cand.sort((a, b) => a[1] - b[1]);
+      if (cand[0][1] > 46) { dragLine = null; return; }
+      dragLine = cand[0][0];
+      loupe = p;
+      e.preventDefault();
+      schedule();
+      return;
+    }
+    if (ptrs.size === 1) { drag = { x: e.clientX, y: e.clientY, ax: pl.ax, ay: pl.ay }; cv.classList.add('drag'); }
+    else if (ptrs.size === 2) drag = { pinch: true, d0: dist(), k0: pl.k, ax: pl.ax, ay: pl.ay };
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!ptrs.has(e.pointerId)) return;
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (mode === 'mark') {
+      if (!dragLine) return;
+      const p = pos(e), ds = edScale;
+      loupe = p;
+      if (dragLine === 'crown') mk.crown = clamp(p.y / ds, 0, mk.chin - P.h * .04);
+      else if (dragLine === 'chin') mk.chin = clamp(p.y / ds, mk.crown + P.h * .04, P.h);
+      else mk.cx = clamp(p.x / ds, 0, P.w);
+      schedule();
+      return;
+    }
+    if (!drag) return;
+    const sp = spec();
+    if (ptrs.size >= 2 && drag.pinch) {
+      const r = dist() / drag.d0, k1 = clamp(drag.k0 * r, kAuto() * .5, kAuto() * 2);
+      const cx = sp.w / 2, cy = sp.h / 2, f = k1 / drag.k0;
+      pl.k = k1; pl.ax = cx + (drag.ax - cx) * f; pl.ay = cy + (drag.ay - cy) * f;
+    } else if (ptrs.size === 1 && !drag.pinch) {
+      pl.ax = drag.ax + (e.clientX - drag.x) / edScale;
+      pl.ay = drag.ay + (e.clientY - drag.y) / edScale;
+    }
+    schedule(); clearTimeout(chkT); chkT = setTimeout(() => { paintChecks(); syncZoomUi(); scheduleOutPv(); }, 120);
+  });
+  const up = e => {
+    if (!ptrs.has(e.pointerId)) return;
+    ptrs.delete(e.pointerId);
+    if (mode === 'mark') { if (dragLine) { dragLine = null; loupe = null; detected = true; autoFit(); schedule(); scheduleOutPv(); } return; }
+    if (ptrs.size === 1 && drag && drag.pinch) { const a = [...ptrs.values()][0]; drag = { x: a.x, y: a.y, ax: pl.ax, ay: pl.ay }; }
+    if (!ptrs.size) { drag = null; cv.classList.remove('drag'); paintChecks(); syncZoomUi(); scheduleOutPv(); }
+  };
+  cv.addEventListener('pointerup', up);
+  cv.addEventListener('pointercancel', up);
+  cv.addEventListener('wheel', e => {
+    if (!P || mode !== 'fit') return;
+    e.preventDefault();
+    zoomTo(pl.k * Math.exp(-e.deltaY * .0012));
+  }, { passive: false });
+}
+function zoomTo(k1) {
+  const sp = spec(), ka = kAuto();
+  k1 = clamp(k1, ka * .5, ka * 2);
+  const cx = sp.w / 2, cy = sp.h / 2, f = k1 / pl.k;
+  pl.ax = cx + (pl.ax - cx) * f; pl.ay = cy + (pl.ay - cy) * f; pl.k = k1;
+  schedule(); syncZoomUi(); clearTimeout(chkT); chkT = setTimeout(() => { paintChecks(); scheduleOutPv(); }, 120);
+}
+function syncZoomUi() {
+  const kz = pl.k / kAuto();
+  $('#zoom').value = String(kz); $('#zoomOut').textContent = Math.round(kz * 100) + '%';
+}
+
+/* ══ 연결 ══ */
+function refreshAll() { paintSpec(); paintEditor(); paintOut(); saveOpt(); }
+function setMode(m) {
+  if (!P) return;
+  mode = m;
+  if (m === 'fit') { pl.k = pl.k || kAuto(); }
+  paintEditor();
+  paintOut();
+}
+function init() {
+  loadOpt();
+  specIcons();
+  $('#cw').value = S.cw; $('#ch').value = S.ch; $('#pw').value = S.pw; $('#ph').value = S.ph; $('#kb').value = S.kb;
+  $('#sizeBody').innerHTML = SPEC_KEYS.filter(k => k !== 'custom').map(k => {
+    const s = SPEC[k], L = sheetLayout(s);
+    return '<tr><td><b>' + s.name + '</b></td><td class="n">' + fmm(s.w / 10) + '×' + fmm(s.h / 10) + 'cm</td><td class="n">' + fmm(s.head[0]) + '~' + fmm(s.head[1]) + 'mm' + (s.official ? '' : ' (권장)') +
+      '</td><td>' + (s.white ? '흰색' : '제출처 안내') + '</td><td class="n">' + s.px[0] + '×' + s.px[1] + (s.kb ? ' · ' + s.kb + 'KB 이하' : '') + '</td><td class="n">' + L.n + '장</td></tr>';
+  }).join('');
+  const locked = () => document.body.classList.contains('ia-lock');
+
+  $('#segSpec').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    S.spec = b.dataset.k;
+    if (P) autoFit();
+    refreshAll();
+  });
+  const custom = () => { S.cw = $('#cw').value; S.ch = $('#ch').value; if (P) autoFit(); refreshAll(); };
+  $('#cw').addEventListener('change', custom); $('#ch').addEventListener('change', custom);
+
+  $('#file').addEventListener('change', e => { addFile(e.target.files); e.target.value = ''; });
+  $('#sampleBtn').addEventListener('click', loadSample);
+  ['dragenter', 'dragover'].forEach(ev => document.addEventListener(ev, e => {
+    if (!e.dataTransfer || ![...(e.dataTransfer.types || [])].includes('Files')) return;
+    e.preventDefault(); if (!locked()) $('#drop').classList.add('over');
+  }));
+  ['dragleave', 'drop'].forEach(ev => document.addEventListener(ev, e => {
+    if (ev === 'drop' || e.relatedTarget === null) $('#drop').classList.remove('over');
+  }));
+  document.addEventListener('drop', e => {
+    if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+    e.preventDefault();
+    if (locked()) return;
+    addFile(e.dataTransfer.files);
+  });
+  document.addEventListener('paste', e => {
+    if (locked() || !e.clipboardData) return;
+    const fs = [...e.clipboardData.files].filter(f => /^image\//.test(f.type));
+    if (!fs.length) return;
+    e.preventDefault();
+    addFile(fs.map(f => f.name && f.name !== 'image.png' ? f : new File([f], '붙여넣은 사진.png', { type: f.type, lastModified: Date.now() })));
+  });
+
+  $('#stepTab').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || b.disabled) return; setMode(b.dataset.m); });
+  $('#goFit').addEventListener('click', () => { autoFit(); setMode('fit'); });
+  $('#reDetect').addEventListener('click', () => {
+    if (!P) return;
+    if (P.sample) { mk = { crown: 392, chin: 965, cx: 600 }; detected = true; }
+    else { const d = detectFace(P.src); mk = d.mk; detected = d.ok; }
+    autoFit(); paintEditor();
+    toast(detected ? '얼굴 위치를 다시 짐작했습니다' : '얼굴을 찾지 못했습니다 — 선을 끌어 맞춰 주세요', 3000);
+  });
+  initPointer();
+  $('#zoom').addEventListener('input', e => zoomTo(kAuto() * +e.target.value));
+  $('#tilt').addEventListener('input', e => { pl.th = +e.target.value; $('#tiltOut').textContent = (pl.th > 0 ? '+' : '') + pl.th + '°'; schedule(); clearTimeout(chkT); chkT = setTimeout(() => { paintChecks(); scheduleOutPv(); }, 120); });
+  $('#autoFit').addEventListener('click', () => { autoFit(); paintEditor(); scheduleOutPv(); toast('머리 길이 ' + fmm(headT(spec())) + 'mm에 맞췄습니다', 2200); });
+  $('#flipBtn').addEventListener('click', () => { pl.flip = !pl.flip; paintEditor(); scheduleOutPv(); });
+  $('#guideBtn').addEventListener('click', () => { S.guides = !S.guides; saveOpt(); paintEditor(); });
+
+  $('#segOut').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.out = b.dataset.v; paintOut(); saveOpt(); });
+  $('#segPx').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return; S.px = b.dataset.v;
+    if (S.px === 'custom' && !(+S.pw > 0)) { S.pw = spec().px[0]; S.ph = spec().px[1]; $('#pw').value = S.pw; $('#ph').value = S.ph; }
+    paintOut(); saveOpt();
+  });
+  ['pw', 'ph', 'kb'].forEach(id => $('#' + id).addEventListener('input', e => { S[id] = e.target.value; paintOut(); saveOpt(); }));
+  $('#segA4').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.a4 = +b.dataset.v; paintOut(); saveOpt(); });
+  $('#saveBtn').addEventListener('click', save);
+
+  $('#doneHide').addEventListener('click', () => AD.hideDone());
+  $('#anchorX').addEventListener('click', () => { AD.closed = true; AD.sync(); });
+
+  const goOut = () => { const u = externalUrl(); if (u) { location.href = u; return; } copyAddr(true); iaCopied(); };
+  $('#iaGo').addEventListener('click', goOut);
+  $('#iaGo2').addEventListener('click', goOut);
+  $('#doneGo').addEventListener('click', goOut);
+  $('#iaStay').addEventListener('click', () => {
+    lockInApp(false);
+    AD.init(); AD.sync();
+    toast('저장은 안 됩니다. 저장하려면 위쪽 「' + $('#iaGo').textContent + '」를 눌러 주세요.', 5200);
+  });
+  $('#iaX').addEventListener('click', () => {
+    document.body.classList.remove('inapp');
+    try { sessionStorage.setItem('id_photo.iahide', '1'); } catch (e) { /* 무시 */ }
+  });
+
+  let rT = 0;
+  window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { drawEditor(); drawOutPv(); AD.sync(); }, 150); });
+  window.addEventListener('scroll', () => AD.sync(), { passive: true });
+  document.addEventListener('focusin', () => AD.sync());
+  document.addEventListener('focusout', () => setTimeout(() => AD.sync(), 0));
+
+  refreshAll();
+  initInApp();
+  if (!document.body.classList.contains('ia-lock')) AD.init();
+  AD.sync();
+}
+init();
+</script>
+</body>
+</html>
